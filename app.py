@@ -90,7 +90,7 @@ a{{color:inherit;text-decoration:none}}
 header{{position:sticky;top:0;z-index:20;background:rgba(3,10,31,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}}
 .bar{{display:flex;align-items:center;justify-content:space-between;height:72px;padding:0 24px}}
 .brand{{display:flex;align-items:center;gap:12px;cursor:pointer}}
-.brand svg{{width:34px;height:34px;filter:drop-shadow(0 0 10px rgba(31,139,255,.8))}
+.brand svg{{width:34px;height:34px;filter:drop-shadow(0 0 10px rgba(31,139,255,.8)}}
 .brand b{{font-size:1.65rem;font-weight:800;letter-spacing:-.02em}}
 .brand b span{{color:var(--blue)}}
 .brand i{{font-style:normal;color:var(--muted);font-size:.92rem;padding-left:14px;border-left:1px solid var(--line)}}
