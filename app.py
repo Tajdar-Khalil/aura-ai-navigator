@@ -3,30 +3,34 @@ import streamlit.components.v1 as components
 from agent import AuraAgent
 from rag import RAGKnowledgeBase
 
+# Configure Streamlit page settings
 st.set_page_config(
-    page_title="AuraAI — AI Career & Skills Navigator",
+    page_title="AuraAI | AI Career & Skills Navigator",
     page_icon="✨",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# Hide Streamlit Chrome & Apply Custom SaaS Dark Theme
-st.markdown("""
+# Remove default Streamlit header, footer, and padding for clean full-screen rendering
+hide_streamlit_style = """
     <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
-    .stApp { background-color: #0b0f19; color: #f8fafc; }
+    .stApp { background-color: #030a1f; color: #f2f6ff; }
     .block-container { padding: 0 !important; max-width: 100% !important; }
+    iframe { width: 100% !important; border: none !important; }
     </style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Initialize Agent & RAG
+# Exact Landing Page HTML Code
 agent = AuraAgent()
 rag = RAGKnowledgeBase()
 
-# HTML/CSS/JS Frontend Prototype matching the Exact Reference Dashboard
-aura_html = """
+# Exact Landing Page HTML Code
+aura_landing_html = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -91,7 +95,6 @@ h1 em{font-style:normal;background:linear-gradient(90deg,#3aa0ff,#b07cff);-webki
 .hello strong{display:flex;align-items:center;gap:8px;font-size:1.08rem}
 .hello strong svg{width:18px;height:18px}
 .hello span{color:var(--muted);font-size:.92rem}
-.dot{width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
 
 /* Features */
 .features{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;padding:30px 0 80px}
@@ -121,6 +124,38 @@ input::placeholder,textarea::placeholder{color:#6f87b5}
 input:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(31,139,255,.25)}
 textarea{min-height:120px;resize:vertical}
 .ok{display:none;color:var(--cyan);font-weight:600}
+
+/* Auth modal */
+.overlay{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,6,20,.72);backdrop-filter:blur(8px)}
+.overlay.show{display:flex;animation:fade .2s ease}
+.modal{position:relative;width:min(440px,100%);max-height:94vh;overflow:auto;background:linear-gradient(170deg,#0d2a66,#071a45);border:1px solid var(--line);border-radius:22px;padding:30px 28px 26px;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(31,139,255,.22);animation:pop .22s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+.x{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:1.2rem;cursor:pointer}
+.x:hover{color:var(--text);background:rgba(31,139,255,.14)}
+.m-head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.m-head img{width:48px;height:48px;border-radius:50%;object-fit:cover;object-position:50% 20%;border:2px solid rgba(80,160,255,.8)}
+.m-head h2{font-size:1.35rem;letter-spacing:-.02em;line-height:1.2}
+.m-head p{color:var(--muted);font-size:.88rem}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border:1px solid var(--line);border-radius:14px;background:rgba(3,10,31,.5);margin-bottom:20px}
+.seg button{padding:10px;border:0;border-radius:10px;background:transparent;color:var(--muted);font:600 .92rem var(--font);cursor:pointer}
+.seg button.on{background:linear-gradient(180deg,#2b97ff,#1468d6);color:#fff;box-shadow:0 6px 18px rgba(31,139,255,.35)}
+.pane{display:none;gap:14px}
+.pane.on{display:grid}
+.field{position:relative}
+.field .eye{position:absolute;right:8px;top:33px;border:0;background:none;color:var(--muted);cursor:pointer;font-size:.8rem;font-weight:600;padding:6px 8px;border-radius:8px}
+.field .eye:hover{color:var(--text)}
+.field input.bad{border-color:#ff6b7a;box-shadow:0 0 0 3px rgba(255,107,122,.18)}
+.err{color:#ff8d99;font-size:.82rem;font-weight:500;min-height:0}
+.row{display:flex;justify-content:space-between;align-items:center;font-size:.88rem;color:var(--muted)}
+.row a,.swap{color:#6db4ff;font-weight:600;background:none;border:0;cursor:pointer;font:inherit;font-weight:600}
+.row a:hover,.swap:hover{text-decoration:underline}
+.m-foot{text-align:center;color:var(--muted);font-size:.9rem;margin-top:16px}
+.notice{display:none;text-align:center;padding:26px 6px 8px}
+.notice.show{display:block}
+.notice .tick{width:60px;height:60px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;background:rgba(34,224,192,.12);border:1px solid var(--cyan);color:var(--cyan);font-size:1.6rem}
+.notice h3{font-size:1.25rem;margin-bottom:6px}
+.notice p{color:var(--muted);margin-bottom:20px}
 
 /* Footer */
 footer{margin-top:auto;border-top:1px solid var(--line);background:rgba(3,10,31,.7);padding:28px 0}
@@ -176,7 +211,7 @@ footer{margin-top:auto;border-top:1px solid var(--line);background:rgba(3,10,31,
         <a class="btn primary lg" href="#" data-route="chat">&#128172; Enter Aura</a>
       </div>
       <div class="portrait">
-        <img src="aura_avatar.jpg" alt="Aura, your AI career coach">
+        <img src="https://raw.githubusercontent.com/Tajdar-Khalil/Goat-/main/aura_avatar.jpg" alt="Aura, your AI career coach">
         <div class="hello">
           <strong><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z"/></svg>Hi, I'm Aura!</strong>
           <span>Your AI Career &amp; Skills Navigator</span>
@@ -227,12 +262,53 @@ footer{margin-top:auto;border-top:1px solid var(--line);background:rgba(3,10,31,
 
 <footer>
   <div class="wrap foot">
-    <span>&copy; <span id="yr">2026</span> AuraAI. All rights reserved.</span>
+    <span>&copy; <span id="yr">2026</span> AuraAI. All rights reserved. Designed & developed by Tajdar Khalil.</span>
     <nav>
       <a href="#home">Home</a><a href="#about">About</a><a href="#contact">Contact</a>
     </nav>
   </div>
 </footer>
+
+<div class="overlay" id="overlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <button class="x" id="close" aria-label="Close">&times;</button>
+
+    <div id="authBody">
+      <div class="m-head">
+        <img src="https://raw.githubusercontent.com/Tajdar-Khalil/Goat-/main/aura_avatar.jpg" alt="">
+        <div><h2 id="mTitle">Welcome back</h2><p id="mSub">Log in to continue with Aura.</p></div>
+      </div>
+      <div class="seg" role="tablist">
+        <button type="button" role="tab" id="tabLogin" data-mode="login" class="on">Login</button>
+        <button type="button" role="tab" id="tabRegister" data-mode="register">Register</button>
+      </div>
+
+      <form class="pane on" id="paneLogin" novalidate>
+        <div class="field"><label>Email<input name="email" type="email" autocomplete="email" placeholder="you@example.com"></label><div class="err"></div></div>
+        <div class="field"><label>Password<input name="password" type="password" autocomplete="current-password" placeholder="Enter your password"></label><button type="button" class="eye">Show</button><div class="err"></div></div>
+        <div class="row"><span></span><a href="#" id="forgot">Forgot password?</a></div>
+        <button class="btn primary lg" type="submit" style="justify-content:center">Log in</button>
+        <p class="m-foot" style="margin-top:2px">New to Aura? <button type="button" class="swap" data-mode="register">Create an account</button></p>
+      </form>
+
+      <form class="pane" id="paneRegister" novalidate>
+        <div class="field"><label>Full name<input name="name" autocomplete="name" placeholder="Your full name"></label><div class="err"></div></div>
+        <div class="field"><label>Email<input name="email" type="email" autocomplete="email" placeholder="you@example.com"></label><div class="err"></div></div>
+        <div class="field"><label>Password<input name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters"></label><button type="button" class="eye">Show</button><div class="err"></div></div>
+        <div class="field"><label>Confirm password<input name="confirm" type="password" autocomplete="new-password" placeholder="Repeat your password"></label><div class="err"></div></div>
+        <button class="btn primary lg" type="submit" style="justify-content:center">Create account</button>
+        <p class="m-foot" style="margin-top:2px">Already registered? <button type="button" class="swap" data-mode="login">Log in</button></p>
+      </form>
+    </div>
+
+    <div class="notice" id="notice">
+      <div class="tick">&#10003;</div>
+      <h3 id="nTitle"></h3>
+      <p id="nText"></p>
+      <button class="btn primary lg" id="nBtn" type="button">Continue</button>
+    </div>
+  </div>
+</div>
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
@@ -257,11 +333,136 @@ const io = new IntersectionObserver(entries => {
 }, { rootMargin: '-45% 0px -50% 0px' });
 targets.forEach(t => io.observe(t));
 
-// Placeholder routes: wire these to your pages in the Streamlit port
-document.querySelectorAll('[data-route]').forEach(a =>
-  a.addEventListener('click', e => { e.preventDefault(); console.log('Route:', a.dataset.route); }));
+// ---- Login / Register popup ----
+const overlay = document.getElementById('overlay');
+const modal = overlay.querySelector('.modal');
+const titles = {
+  login:    ['Welcome back', 'Log in to continue with Aura.'],
+  register: ['Create your account', 'Start your career journey with Aura.']
+};
+let lastFocus = null;
 
-// Contact form (front-end only)
+function setMode(mode) {
+  document.getElementById('paneLogin').classList.toggle('on', mode === 'login');
+  document.getElementById('paneRegister').classList.toggle('on', mode === 'register');
+  document.getElementById('tabLogin').classList.toggle('on', mode === 'login');
+  document.getElementById('tabRegister').classList.toggle('on', mode === 'register');
+  document.getElementById('tabLogin').setAttribute('aria-selected', mode === 'login');
+  document.getElementById('tabRegister').setAttribute('aria-selected', mode === 'register');
+  document.getElementById('mTitle').textContent = titles[mode][0];
+  document.getElementById('mSub').textContent = titles[mode][1];
+  clearErrors();
+}
+function clearErrors() {
+  overlay.querySelectorAll('.err').forEach(e => e.textContent = '');
+  overlay.querySelectorAll('input.bad').forEach(i => i.classList.remove('bad'));
+}
+function openModal(mode) {
+  lastFocus = document.activeElement;
+  document.getElementById('authBody').style.display = '';
+  document.getElementById('notice').classList.remove('show');
+  setMode(mode);
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  nav.classList.remove('open');
+  setTimeout(() => overlay.querySelector('.pane.on input').focus(), 30);
+}
+function closeModal() {
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  overlay.querySelectorAll('form').forEach(f => f.reset());
+  if (lastFocus) lastFocus.focus();
+}
+function showNotice(title, text, btnText) {
+  document.getElementById('authBody').style.display = 'none';
+  document.getElementById('nTitle').textContent = title;
+  document.getElementById('nText').textContent = text;
+  document.getElementById('nBtn').textContent = btnText;
+  document.getElementById('notice').classList.add('show');
+}
+
+// Open from Login, Register and Enter Aura
+document.querySelectorAll('[data-route]').forEach(a =>
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    openModal(a.dataset.route === 'register' ? 'register' : 'login');
+  }));
+
+// Close: X button, backdrop click, Escape
+document.getElementById('close').addEventListener('click', closeModal);
+overlay.addEventListener('mousedown', e => { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', e => {
+  if (!overlay.classList.contains('show')) return;
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Tab') {
+    const f = [...modal.querySelectorAll('button,input,a[href]')].filter(el => el.offsetParent !== null);
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+});
+
+// Switch between Login and Register
+overlay.querySelectorAll('[data-mode]').forEach(b =>
+  b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+// Show / hide password
+overlay.querySelectorAll('.eye').forEach(btn =>
+  btn.addEventListener('click', () => {
+    const input = btn.parentElement.querySelector('input');
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.textContent = show ? 'Hide' : 'Show';
+  }));
+
+// Validation helpers
+const emailOk = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+function fail(input, msg) {
+  input.classList.add('bad');
+  input.closest('.field').querySelector('.err').textContent = msg;
+  return false;
+}
+function validate(form, mode) {
+  clearErrors();
+  const f = form.elements;
+  let ok = true, firstBad = null;
+  const check = (cond, input, msg) => { if (!cond) { ok = fail(input, msg); firstBad = firstBad || input; } };
+  if (mode === 'register') check(f.name.value.trim().length >= 2, f.name, 'Enter your full name.');
+  check(emailOk(f.email.value.trim()), f.email, 'Enter a valid email address.');
+  check(f.password.value.length >= (mode === 'register' ? 8 : 1), f.password,
+        mode === 'register' ? 'Use at least 8 characters.' : 'Enter your password.');
+  if (mode === 'register') check(f.confirm.value === f.password.value && f.confirm.value, f.confirm, 'Passwords do not match.');
+  if (firstBad) firstBad.focus();
+  return ok;
+}
+
+// Submit handlers
+document.getElementById('paneLogin').addEventListener('submit', e => {
+  e.preventDefault();
+  if (!validate(e.target, 'login')) return;
+  showNotice('You are logged in', 'Aura is ready when you are.', 'Enter Aura');
+});
+document.getElementById('paneRegister').addEventListener('submit', e => {
+  e.preventDefault();
+  if (!validate(e.target, 'register')) return;
+  showNotice('Account created', 'Your account is ready. Log in to start chatting with Aura.', 'Go to login');
+  document.getElementById('nBtn').dataset.next = 'login';
+});
+document.getElementById('nBtn').addEventListener('click', e => {
+  if (e.target.dataset.next === 'login') { e.target.dataset.next = ''; openModal('login'); }
+  else window.location.href = '#home';
+});
+document.getElementById('forgot').addEventListener('click', e => {
+  e.preventDefault();
+  const em = document.querySelector('#paneLogin input[name=email]');
+  if (!emailOk(em.value.trim())) { clearErrors(); fail(em, 'Enter your email first, then select Forgot password.'); em.focus(); return; }
+  showNotice('Check your inbox', 'If an account exists for ' + em.value.trim() + ', a reset link is on its way.', 'Back to login');
+  document.getElementById('nBtn').dataset.next = 'login';
+});
+
+// Contact form
 document.getElementById('contactForm').addEventListener('submit', e => {
   e.preventDefault();
   document.getElementById('ok').style.display = 'block';
@@ -270,5 +471,7 @@ document.getElementById('contactForm').addEventListener('submit', e => {
 </script>
 </body>
 </html>
+"""
 
-components.html(aura_html, height=880, scrolling=False)
+# Render the landing page component in Streamlit
+components.html(aura_landing_html, height=900, scrolling=True)
