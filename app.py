@@ -1,18 +1,47 @@
+from __future__ import annotations
+
+import base64
+from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
-from agent import AuraAgent
-from rag import RAGKnowledgeBase
 
-# Configure Streamlit page settings
+from agent import run_aura
+from firebase_service import (
+    firebase_available,
+    login_user,
+    register_user,
+    send_login_notification,
+)
+from memory import ConversationMemory
+from rag import retrieve_context
+from security import sanitize_output, validate_user_input
+
+# -----------------------------------------------------------------------------
+# Configuration & Asset Paths
+# -----------------------------------------------------------------------------
+BASE_DIR = Path(__file__).resolve().parent
+ASSETS_DIR = BASE_DIR / "assets"
+
+def _first_existing(*paths: Path) -> Path:
+    for path in paths:
+        if path.exists():
+            return path
+    return paths[0]
+
+AVATAR = _first_existing(
+    ASSETS_DIR / "aura_avatar.jpg",
+    BASE_DIR / "aura_avatar.jpg",
+)
+
 st.set_page_config(
-    page_title="AuraAI | AI Career & Skills Navigator",
+    page_title="AuraAI — AI Career & Skills Navigator",
     page_icon="✨",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# Remove default Streamlit header, footer, and padding for clean full-screen rendering
-hide_streamlit_style = """
+# Hide Streamlit default UI chrome
+st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
@@ -21,16 +50,12 @@ hide_streamlit_style = """
     .block-container { padding: 0 !important; max-width: 100% !important; }
     iframe { width: 100% !important; border: none !important; }
     </style>
-"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# Initialize Agent & RAG
-# Exact Landing Page HTML Code
-agent = AuraAgent()
-rag = RAGKnowledgeBase()
-
-# Exact Landing Page HTML Code
-aura_landing_html = """
+# -----------------------------------------------------------------------------
+# Complete Interactive Frontend Prototype (HTML/CSS/JS)
+# -----------------------------------------------------------------------------
+aura_app_html = f"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,438 +65,363 @@ aura_landing_html = """
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-:root{
+:root{{
   --bg-0:#030a1f; --bg-1:#061a45; --bg-2:#0a2a6b;
   --panel:rgba(12,34,84,.55); --panel-solid:#0b2253;
   --line:rgba(77,140,255,.28);
   --blue:#1f8bff; --blue-d:#1468d6; --cyan:#22e0c0; --violet:#b07cff;
   --text:#f2f6ff; --muted:#9db4dd;
   --font:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;scroll-padding-top:84px}
-body{font-family:var(--font);color:var(--text);background:var(--bg-0);line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
-body::before{content:"";position:fixed;inset:0;z-index:-1;
+}}
+*{{box-sizing:border-box;margin:0;padding:0}}
+html{{scroll-behavior:smooth}}
+body{{font-family:var(--font);color:var(--text);background:var(--bg-0);line-height:1.6;min-height:100vh;display:flex;flex-direction:column}}
+body::before{{content:"";position:fixed;inset:0;z-index:-1;
   background:
    radial-gradient(900px 500px at 85% 12%,rgba(31,139,255,.28),transparent 60%),
    radial-gradient(700px 500px at 5% 0%,rgba(20,104,214,.25),transparent 60%),
-   linear-gradient(160deg,var(--bg-0) 0%,var(--bg-1) 55%,#08235a 100%)}
-a{color:inherit;text-decoration:none}
-:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:10px}
-.wrap{width:min(1180px,92%);margin-inline:auto}
+   linear-gradient(160deg,var(--bg-0) 0%,var(--bg-1) 55%,#08235a 100%)}}
+a{{color:inherit;text-decoration:none}}
+.wrap{{width:min(1180px,92%);margin-inline:auto}}
 
 /* Header */
-header{position:sticky;top:0;z-index:20;background:rgba(3,10,31,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-.bar{display:flex;align-items:center;justify-content:space-between;height:72px;gap:16px}
-.brand{display:flex;align-items:center;gap:12px}
-.brand svg{width:34px;height:34px;filter:drop-shadow(0 0 10px rgba(31,139,255,.8))}
-.brand b{font-size:1.65rem;font-weight:800;letter-spacing:-.02em}
-.brand b span{color:var(--blue)}
-.brand i{font-style:normal;color:var(--muted);font-size:.92rem;padding-left:14px;border-left:1px solid var(--line)}
-nav{display:flex;align-items:center;gap:6px}
-nav a.link{padding:10px 20px;border-radius:12px;font-weight:600;font-size:.95rem;color:#d6e3ff;transition:background .2s,color .2s}
-nav a.link:hover{background:rgba(31,139,255,.16)}
-nav a.link.active{background:linear-gradient(180deg,#1f8bff,#1468d6);color:#fff;box-shadow:0 6px 20px rgba(31,139,255,.35)}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:12px;font:600 .95rem var(--font);cursor:pointer;border:1px solid var(--line);color:var(--text);background:transparent;transition:transform .15s,box-shadow .2s,background .2s}
-.btn:hover{background:rgba(31,139,255,.14)}
-.btn:active{transform:translateY(1px)}
-.btn.primary{background:linear-gradient(180deg,#2b97ff,#1468d6);border-color:transparent;box-shadow:0 8px 24px rgba(31,139,255,.4)}
-.btn.primary:hover{box-shadow:0 10px 30px rgba(31,139,255,.6)}
-.btn.lg{padding:15px 30px;font-size:1.02rem}
-.nav-actions{display:flex;gap:10px;margin-left:10px}
-.menu{display:none;background:none;border:1px solid var(--line);color:var(--text);border-radius:10px;width:42px;height:42px;font-size:1.3rem;cursor:pointer}
+header{{position:sticky;top:0;z-index:20;background:rgba(3,10,31,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}}
+.bar{{display:flex;align-items:center;justify-content:space-between;height:72px;padding:0 24px}}
+.brand{{display:flex;align-items:center;gap:12px;cursor:pointer}}
+.brand svg{{width:34px;height:34px;filter:drop-shadow(0 0 10px rgba(31,139,255,.8))}
+.brand b{{font-size:1.65rem;font-weight:800;letter-spacing:-.02em}}
+.brand b span{{color:var(--blue)}}
+.brand i{{font-style:normal;color:var(--muted);font-size:.92rem;padding-left:14px;border-left:1px solid var(--line)}}
+nav{{display:flex;align-items:center;gap:6px}}
+nav a.link{{padding:10px 20px;border-radius:12px;font-weight:600;font-size:.95rem;color:#d6e3ff;transition:background .2s,color .2s;cursor:pointer}}
+nav a.link:hover{{background:rgba(31,139,255,.16)}}
+nav a.link.active{{background:linear-gradient(180deg,#1f8bff,#1468d6);color:#fff;box-shadow:0 6px 20px rgba(31,139,255,.35)}}
+.btn{{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:12px;font:600 .95rem var(--font);cursor:pointer;border:1px solid var(--line);color:var(--text);background:transparent;transition:all .2s}}
+.btn:hover{{background:rgba(31,139,255,.14)}}
+.btn.primary{{background:linear-gradient(180deg,#2b97ff,#1468d6);border-color:transparent;box-shadow:0 8px 24px rgba(31,139,255,.4)}}
+.btn.primary:hover{{box-shadow:0 10px 30px rgba(31,139,255,.6)}}
+.btn.lg{{padding:15px 30px;font-size:1.02rem}}
+.nav-actions{{display:flex;gap:10px;margin-left:10px}}
+
+/* Views Container */
+.view-container {{ display: none; flex: 1; }}
+.view-container.active {{ display: block; }}
 
 /* Hero */
-.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;padding:70px 0 40px}
-.badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border:1px solid var(--line);border-radius:999px;color:#7db8ff;font-weight:600;font-size:.9rem;background:rgba(31,139,255,.08)}
-h1{font-size:clamp(2.6rem,6vw,4.6rem);line-height:1.04;font-weight:800;letter-spacing:-.035em;margin:26px 0 22px}
-h1 em{font-style:normal;background:linear-gradient(90deg,#3aa0ff,#b07cff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.lead{color:var(--muted);font-size:1.12rem;max-width:560px;margin-bottom:34px}
-.portrait{position:relative;justify-self:center;width:min(400px,80vw);aspect-ratio:1}
-.portrait::before{content:"";position:absolute;inset:-18px;border-radius:50%;border:2px solid rgba(31,139,255,.65);box-shadow:0 0 50px rgba(31,139,255,.35),inset 0 0 40px rgba(31,139,255,.15)}
-.portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 20%;border-radius:50%;border:3px solid rgba(80,160,255,.8);display:block}
-.hello{position:absolute;right:-30px;bottom:-40px;background:var(--panel-solid);border:1px solid var(--line);border-radius:18px;padding:16px 22px;box-shadow:0 18px 40px rgba(0,0,0,.45),0 0 30px rgba(31,139,255,.2)}
-.hello strong{display:flex;align-items:center;gap:8px;font-size:1.08rem}
-.hello strong svg{width:18px;height:18px}
-.hello span{color:var(--muted);font-size:.92rem}
+.hero{{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;padding:70px 0 40px}}
+.badge{{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border:1px solid var(--line);border-radius:999px;color:#7db8ff;font-weight:600;font-size:.9rem;background:rgba(31,139,255,.08)}}
+h1{{font-size:clamp(2.6rem,6vw,4.6rem);line-height:1.04;font-weight:800;letter-spacing:-.035em;margin:26px 0 22px}}
+h1 em{{font-style:normal;background:linear-gradient(90deg,#3aa0ff,#b07cff);-webkit-background-clip:text;background-clip:text;color:transparent}}
+.lead{{color:var(--muted);font-size:1.12rem;max-width:560px;margin-bottom:34px}}
+.portrait{{position:relative;justify-self:center;width:min(400px,80vw);aspect-ratio:1}}
+.portrait::before{{content:"";position:absolute;inset:-18px;border-radius:50%;border:2px solid rgba(31,139,255,.65);box-shadow:0 0 50px rgba(31,139,255,.35),inset 0 0 40px rgba(31,139,255,.15)}}
+.portrait img{{width:100%;height:100%;object-fit:cover;object-position:50% 20%;border-radius:50%;border:3px solid rgba(80,160,255,.8);display:block}}
+.hello{{position:absolute;right:-30px;bottom:-40px;background:var(--panel-solid);border:1px solid var(--line);border-radius:18px;padding:16px 22px;box-shadow:0 18px 40px rgba(0,0,0,.45),0 0 30px rgba(31,139,255,.2)}}
+.hello strong{{display:flex;align-items:center;gap:8px;font-size:1.08rem}}
+.hello span{{color:var(--muted);font-size:.92rem}}
 
 /* Features */
-.features{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;padding:30px 0 80px}
-.feat{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;transition:border-color .2s,transform .2s}
-.feat:hover{border-color:rgba(77,160,255,.6);transform:translateY(-3px)}
-.ico{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;margin-bottom:16px;background:linear-gradient(145deg,#12388a,#0b2253);border:1px solid var(--line);color:#4aa8ff}
-.ico svg{width:24px;height:24px}
-.feat h3{font-size:1.05rem;margin-bottom:6px}
-.feat p{color:var(--muted);font-size:.92rem}
+.features{{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;padding:30px 0 80px}}
+.feat{{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px}}
+.ico{{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;margin-bottom:16px;background:linear-gradient(145deg,#12388a,#0b2253);border:1px solid var(--line);color:#4aa8ff}}
+.feat h3{{font-size:1.05rem;margin-bottom:6px}}
+.feat p{{color:var(--muted);font-size:.92rem}}
 
-/* Sections */
-section.block{padding:80px 0;border-top:1px solid var(--line)}
-section.block h2{font-size:clamp(1.8rem,3.4vw,2.5rem);letter-spacing:-.025em;margin-bottom:14px}
-.sub{color:var(--muted);max-width:640px;margin-bottom:34px}
-.about-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px}
-.card h3{margin-bottom:8px;font-size:1.05rem;color:#7db8ff}
-.card p{color:var(--muted);font-size:.95rem}
-.contact-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:34px;align-items:start}
-.info{display:grid;gap:14px}
-.info div{display:flex;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
-.info svg{width:22px;height:22px;color:#4aa8ff;flex:none}
-form{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px;display:grid;gap:14px}
-label{font-weight:600;font-size:.9rem;display:grid;gap:6px}
-input,textarea{font:400 .95rem var(--font);color:var(--text);background:rgba(3,10,31,.6);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%}
-input::placeholder,textarea::placeholder{color:#6f87b5}
-input:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(31,139,255,.25)}
-textarea{min-height:120px;resize:vertical}
-.ok{display:none;color:var(--cyan);font-weight:600}
+/* Dashboard UI Reference Replica */
+.dash-app{{display:grid;grid-template-columns:278px 1fr 350px;gap:18px;padding:18px;height:calc(100vh - 72px);overflow:hidden}}
+.panel{{background:var(--panel);border:1px solid var(--line);border-radius:20px;min-height:0}}
+aside.left{{display:flex;flex-direction:column;gap:16px;overflow:auto;padding:12px}}
+.menu{{display:grid;gap:4px}}
+.menu button{{display:flex;align-items:center;gap:14px;padding:13px 16px;border:0;border-radius:12px;background:none;color:#d6e3ff;font-size:.98rem;font-weight:500;cursor:pointer;text-align:left;transition:background .2s}}
+.menu button:hover{{background:rgba(31,139,255,.14)}}
+.menu button.on{{background:linear-gradient(180deg,#1f8bff,#1468d6);color:#fff;font-weight:600;box-shadow:0 6px 18px rgba(31,139,255,.35)}}
+.card{{padding:18px}}
+.card h4{{font-size:.95rem;font-weight:600;margin-bottom:12px}}
+.prog{{display:flex;align-items:center;gap:14px}}
+.ring{{width:70px;height:70px;border-radius:50%;flex:none;background:conic-gradient(var(--blue) 68%,rgba(255,255,255,.1) 0);display:grid;place-items:center}}
+.ring span{{width:54px;height:54px;border-radius:50%;background:#0a2054;display:grid;place-items:center;font-weight:700;font-size:.95rem}}
+.recent{{padding:16px;flex:1;overflow:auto}}
+.chat-item{{display:flex;gap:12px;align-items:center;width:100%;padding:10px 6px;border:0;border-bottom:1px solid rgba(77,140,255,.15);background:none;text-align:left;cursor:pointer;border-radius:10px;color:inherit}}
+.chat-item:hover{{background:rgba(31,139,255,.1)}}
+.chat-item .ci{{width:34px;height:34px;border-radius:10px;background:rgba(31,139,255,.2);display:grid;place-items:center;color:#7db8ff;flex:none}}
+.chat-item b{{display:block;font-size:.84rem;font-weight:500}}
+.chat-item small{{color:var(--muted);font-size:.74rem}}
 
-/* Auth modal */
-.overlay{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,6,20,.72);backdrop-filter:blur(8px)}
-.overlay.show{display:flex;animation:fade .2s ease}
-.modal{position:relative;width:min(440px,100%);max-height:94vh;overflow:auto;background:linear-gradient(170deg,#0d2a66,#071a45);border:1px solid var(--line);border-radius:22px;padding:30px 28px 26px;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(31,139,255,.22);animation:pop .22s ease}
-@keyframes fade{from{opacity:0}to{opacity:1}}
-@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
-.x{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:1.2rem;cursor:pointer}
-.x:hover{color:var(--text);background:rgba(31,139,255,.14)}
-.m-head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.m-head img{width:48px;height:48px;border-radius:50%;object-fit:cover;object-position:50% 20%;border:2px solid rgba(80,160,255,.8)}
-.m-head h2{font-size:1.35rem;letter-spacing:-.02em;line-height:1.2}
-.m-head p{color:var(--muted);font-size:.88rem}
-.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border:1px solid var(--line);border-radius:14px;background:rgba(3,10,31,.5);margin-bottom:20px}
-.seg button{padding:10px;border:0;border-radius:10px;background:transparent;color:var(--muted);font:600 .92rem var(--font);cursor:pointer}
-.seg button.on{background:linear-gradient(180deg,#2b97ff,#1468d6);color:#fff;box-shadow:0 6px 18px rgba(31,139,255,.35)}
-.pane{display:none;gap:14px}
-.pane.on{display:grid}
-.field{position:relative}
-.field .eye{position:absolute;right:8px;top:33px;border:0;background:none;color:var(--muted);cursor:pointer;font-size:.8rem;font-weight:600;padding:6px 8px;border-radius:8px}
-.field .eye:hover{color:var(--text)}
-.field input.bad{border-color:#ff6b7a;box-shadow:0 0 0 3px rgba(255,107,122,.18)}
-.err{color:#ff8d99;font-size:.82rem;font-weight:500;min-height:0}
-.row{display:flex;justify-content:space-between;align-items:center;font-size:.88rem;color:var(--muted)}
-.row a,.swap{color:#6db4ff;font-weight:600;background:none;border:0;cursor:pointer;font:inherit;font-weight:600}
-.row a:hover,.swap:hover{text-decoration:underline}
-.m-foot{text-align:center;color:var(--muted);font-size:.9rem;margin-top:16px}
-.notice{display:none;text-align:center;padding:26px 6px 8px}
-.notice.show{display:block}
-.notice .tick{width:60px;height:60px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;background:rgba(34,224,192,.12);border:1px solid var(--cyan);color:var(--cyan);font-size:1.6rem}
-.notice h3{font-size:1.25rem;margin-bottom:6px}
-.notice p{color:var(--muted);margin-bottom:20px}
+main.chat-main{{display:flex;flex-direction:column;overflow:hidden;background:var(--panel)}}
+.c-head{{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--line)}}
+.c-head div{{display:flex;align-items:center;gap:12px}}
+.online{{display:flex;align-items:center;gap:8px;padding:7px 16px;border:1px solid rgba(34,224,192,.5);border-radius:999px;color:#7df0d8;font-size:.84rem;background:rgba(34,224,192,.06)}}
+.online i{{width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}}
+.msgs{{flex:1;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:18px}}
+.m{{display:flex;gap:12px;max-width:86%}}
+.m.me{{align-self:flex-end;flex-direction:row-reverse}}
+.m img,.m .av{{width:44px;height:44px;border-radius:50%;object-fit:cover;object-position:50% 20%;border:2px solid rgba(80,160,255,.7);flex:none}}
+.bub{{padding:14px 18px;border-radius:18px;background:rgba(20,52,120,.7);border:1px solid var(--line);font-size:.94rem;line-height:1.6}}
+.m.me .bub{{background:linear-gradient(180deg,#1b4a9a,#143b80);border-top-right-radius:6px}}
+.bub time{{display:block;text-align:right;color:var(--muted);font-size:.72rem;margin-top:6px}}
+.sec{{background:rgba(7,22,60,.65);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}}
+.sec section{{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(77,140,255,.18)}}
+.sec section:last-child{{border:0;padding-bottom:0}}
+.sec .ic{{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:#fff}}
+.sec h5{{color:#4db3ff;font-size:.92rem;margin-bottom:4px}}
+.sec ul{{padding-left:18px;font-size:.84rem;color:#dbe7ff;line-height:1.75}}
+.chips{{display:flex;gap:10px;flex-wrap:wrap;padding:0 22px 12px}}
+.chip{{padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(31,139,255,.1);font-size:.8rem;cursor:pointer;color:#d6e3ff}}
+.chip:hover{{background:rgba(31,139,255,.25)}}
+.input-area{{display:flex;align-items:center;gap:10px;margin:0 22px 22px;padding:8px 8px 8px 16px;border:1px solid var(--line);border-radius:16px;background:rgba(3,10,31,.55)}}
+.input-area input{{flex:1;background:none;border:0;color:var(--text);font:400 .95rem var(--font);outline:none}}
+.send{{width:46px;height:40px;border:0;border-radius:12px;background:linear-gradient(180deg,#2b97ff,#1468d6);cursor:pointer;display:grid;place-items:center;color:#fff}}
+
+aside.right{{display:flex;flex-direction:column;gap:16px;overflow:auto;padding:12px}}
+.aura-profile{{position:relative;padding:20px;text-align:center}}
+.aura-profile img{{width:160px;height:160px;border-radius:50%;object-fit:cover;border:2px solid rgba(31,139,255,.7);margin-bottom:12px}}
+.facts{{display:grid;gap:10px}}
+.fact{{display:flex;gap:12px;align-items:center;padding:10px;background:rgba(31,139,255,.1);border-radius:12px;border:1px solid var(--line);font-size:.82rem}}
+.qa button{{display:flex;align-items:center;gap:12px;width:100%;padding:10px;margin-bottom:8px;border:1px solid var(--line);border-radius:10px;background:rgba(31,139,255,.1);cursor:pointer;color:inherit;text-align:left;font-size:.84rem}}
+
+/* Modal Popup */
+.overlay{{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,6,20,.72);backdrop-filter:blur(8px)}}
+.overlay.show{{display:flex}}
+.modal{{position:relative;width:min(440px,100%);background:linear-gradient(170deg,#0d2a66,#071a45);border:1px solid var(--line);border-radius:22px;padding:30px 28px;box-shadow:0 30px 80px rgba(0,0,0,.6)}}
+.x{{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}}
+.seg{{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border:1px solid var(--line);border-radius:14px;background:rgba(3,10,31,.5);margin-bottom:20px}}
+.seg button{{padding:10px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-weight:600;cursor:pointer}}
+.seg button.on{{background:linear-gradient(180deg,#2b97ff,#1468d6);color:#fff}}
+.pane{{display:none;gap:14px}}
+.pane.on{{display:grid}}
+.field label{{font-size:.9rem;font-weight:600;display:grid;gap:6px;margin-bottom:10px}}
+.field input{{padding:12px;border-radius:10px;background:rgba(3,10,31,.6);border:1px solid var(--line);color:var(--text);width:100%}}
 
 /* Footer */
-footer{margin-top:auto;border-top:1px solid var(--line);background:rgba(3,10,31,.7);padding:28px 0}
-.foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;color:var(--muted);font-size:.9rem}
-.foot nav a{padding:6px 12px;color:var(--muted)}
-.foot nav a:hover{color:var(--text)}
-
-@media(max-width:960px){
-  .hero{grid-template-columns:1fr;padding-top:44px}
-  .portrait{margin:20px 0 50px}
-  .hello{right:0}
-  .features{grid-template-columns:repeat(2,1fr)}
-  .about-grid,.contact-grid{grid-template-columns:1fr}
-  .brand i{display:none}
-  .menu{display:block}
-  nav{position:absolute;top:72px;left:0;right:0;flex-direction:column;align-items:stretch;padding:14px 4%;background:rgba(3,10,31,.97);border-bottom:1px solid var(--line);display:none}
-  nav.open{display:flex}
-  .nav-actions{margin:8px 0 0}
-  .nav-actions .btn{flex:1;justify-content:center}
-}
-@media(max-width:520px){.features{grid-template-columns:1fr}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+footer{{margin-top:auto;border-top:1px solid var(--line);background:rgba(3,10,31,.7);padding:28px 0}}
+.foot{{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:.9rem;padding:0 24px}}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="wrap bar">
-    <a class="brand" href="#home" aria-label="AuraAI home">
-      <svg viewBox="0 0 24 24" fill="#3aa0ff"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z" transform="translate(0 -.3)"/></svg>
+  <div class="bar">
+    <div class="brand" onclick="switchView('home')">
+      <svg viewBox="0 0 24 24" fill="#3aa0ff"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z"/></svg>
       <b>Aura<span>AI</span></b><i>AI Career &amp; Skills Navigator</i>
-    </a>
-    <button class="menu" id="menu" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+    </div>
     <nav id="nav">
-      <a class="link active" href="#home">Home</a>
-      <a class="link" href="#about">About</a>
-      <a class="link" href="#contact">Contact</a>
+      <a class="link active" onclick="switchView('home')">Home</a>
+      <a class="link" onclick="switchView('about')">About</a>
+      <a class="link" onclick="switchView('contact')">Contact</a>
       <div class="nav-actions">
-        <a class="btn" href="#" data-route="login">Login</a>
-        <a class="btn primary" href="#" data-route="register">Register</a>
+        <button class="btn" onclick="openModal('login')">Login</button>
+        <button class="btn primary" onclick="openModal('register')">Register</button>
       </div>
     </nav>
   </div>
 </header>
 
-<main id="home">
+<!-- HOME VIEW -->
+<div id="view-home" class="view-container active">
   <div class="wrap">
     <div class="hero">
       <div>
         <span class="badge">&#10022; Your AI Career Coach</span>
         <h1>Navigate your next move with <em>clarity.</em></h1>
-        <p class="lead">AI Career &amp; Skills Navigator helps you identify skill gaps, find free learning resources, and explore real-time job market trends, all in one place.</p>
-        <a class="btn primary lg" href="#" data-route="chat">&#128172; Enter Aura</a>
+        <p class="lead">AI Career &amp; Skills Navigator helps you identify skill gaps, find free learning resources, and explore real-time job market trends, all in one place[cite: 8].</p>
+        <button class="btn primary lg" onclick="enterDashboard()">&#128172; Enter Aura</button>
       </div>
       <div class="portrait">
-        <img src="https://raw.githubusercontent.com/Tajdar-Khalil/aura-ai-navigator/main/assets/aura_avatar.jpg" alt="Aura, your AI career coach">
+        <img src="https://raw.githubusercontent.com/Tajdar-Khalil/aura-ai-navigator/main/assets/aura_avatar.jpg" alt="Aura">
         <div class="hello">
-          <strong><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z"/></svg>Hi, I'm Aura!</strong>
-          <span>Your AI Career &amp; Skills Navigator</span>
+          <strong>Hi, I'm Aura!</strong>
+          <span>Your AI Career &amp; Skills Navigator[cite: 2]</span>
         </div>
       </div>
     </div>
-
     <div class="features">
-      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></div><h3>Find Skill Gaps</h3><p>Discover what skills to build next.</p></div>
-      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/><rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor"/></svg></div><h3>Learn for Free</h3><p>Get curated free resources &amp; courses.</p></div>
-      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M9 7h8v8"/></svg></div><h3>Market Trends</h3><p>Explore real-time job opportunities.</p></div>
-      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 9-9 9-9-9z"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg></div><h3>Build Your Future</h3><p>Get personalized career guidance.</p></div>
-    </div>
-  </div>
-</main>
-
-<section class="block" id="about">
-  <div class="wrap">
-    <h2>About AuraAI</h2>
-    <p class="sub">Aura is an AI agent that reasons about your goals, retrieves relevant knowledge, uses tools, and checks with you before important decisions.</p>
-    <div class="about-grid">
-      <div class="card"><h3>Knowledge-backed answers</h3><p>Aura searches a curated career knowledge base using RAG with FAISS and MiniLM embeddings, so advice stays grounded.</p></div>
-      <div class="card"><h3>Tools when needed</h3><p>Wikipedia, DuckDuckGo search, an approved HTTP request tool and a calculator, used only when they help answer your question.</p></div>
-      <div class="card"><h3>You stay in control</h3><p>For important choices Aura asks you to approve, reject or request another approach before it continues.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="contact">
-  <div class="wrap contact-grid">
-    <div>
-      <h2>Contact us</h2>
-      <p class="sub">Questions, feedback or ideas for Aura? Send a message and we will reply by email.</p>
-      <div class="info">
-        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>support@auraai.example</div>
-        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Chakwal, Punjab, Pakistan</div>
-      </div>
-    </div>
-    <form id="contactForm">
-      <label>Name<input required placeholder="Your name"></label>
-      <label>Email<input type="email" required placeholder="you@example.com"></label>
-      <label>Message<textarea required placeholder="How can we help?"></textarea></label>
-      <button class="btn primary" type="submit">Send message</button>
-      <p class="ok" id="ok">Message sent. We will get back to you soon.</p>
-    </form>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap foot">
-    <span>&copy; <span id="yr">2026</span> AuraAI. All rights reserved. Designed & developed by Tajdar Khalil.</span>
-    <nav>
-      <a href="#home">Home</a><a href="#about">About</a><a href="#contact">Contact</a>
-    </nav>
-  </div>
-</footer>
-
-<div class="overlay" id="overlay" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
-    <button class="x" id="close" aria-label="Close">&times;</button>
-
-    <div id="authBody">
-      <div class="m-head">
-        <img src="https://raw.githubusercontent.com/Tajdar-Khalil/aura-ai-navigator/main/assets/aura_avatar.jpg" alt="">
-        <div><h2 id="mTitle">Welcome back</h2><p id="mSub">Log in to continue with Aura.</p></div>
-      </div>
-      <div class="seg" role="tablist">
-        <button type="button" role="tab" id="tabLogin" data-mode="login" class="on">Login</button>
-        <button type="button" role="tab" id="tabRegister" data-mode="register">Register</button>
-      </div>
-
-      <form class="pane on" id="paneLogin" novalidate>
-        <div class="field"><label>Email<input name="email" type="email" autocomplete="email" placeholder="you@example.com"></label><div class="err"></div></div>
-        <div class="field"><label>Password<input name="password" type="password" autocomplete="current-password" placeholder="Enter your password"></label><button type="button" class="eye">Show</button><div class="err"></div></div>
-        <div class="row"><span></span><a href="#" id="forgot">Forgot password?</a></div>
-        <button class="btn primary lg" type="submit" style="justify-content:center">Log in</button>
-        <p class="m-foot" style="margin-top:2px">New to Aura? <button type="button" class="swap" data-mode="register">Create an account</button></p>
-      </form>
-
-      <form class="pane" id="paneRegister" novalidate>
-        <div class="field"><label>Full name<input name="name" autocomplete="name" placeholder="Your full name"></label><div class="err"></div></div>
-        <div class="field"><label>Email<input name="email" type="email" autocomplete="email" placeholder="you@example.com"></label><div class="err"></div></div>
-        <div class="field"><label>Password<input name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters"></label><button type="button" class="eye">Show</button><div class="err"></div></div>
-        <div class="field"><label>Confirm password<input name="confirm" type="password" autocomplete="new-password" placeholder="Repeat your password"></label><div class="err"></div></div>
-        <button class="btn primary lg" type="submit" style="justify-content:center">Create account</button>
-        <p class="m-foot" style="margin-top:2px">Already registered? <button type="button" class="swap" data-mode="login">Log in</button></p>
-      </form>
-    </div>
-
-    <div class="notice" id="notice">
-      <div class="tick">&#10003;</div>
-      <h3 id="nTitle"></h3>
-      <p id="nText"></p>
-      <button class="btn primary lg" id="nBtn" type="button">Continue</button>
+      <div class="feat"><div class="ico"><i class="fa-solid fa-bullseye"></i></div><h3>Find Skill Gaps</h3><p>Discover what skills to build next[cite: 8].</p></div>
+      <div class="feat"><div class="ico"><i class="fa-solid fa-book-open"></i></div><h3>Learn for Free</h3><p>Get curated free resources &amp; courses.</p></div>
+      <div class="feat"><div class="ico"><i class="fa-solid fa-chart-line"></i></div><h3>Market Trends</h3><p>Explore real-time job opportunities.</p></div>
+      <div class="feat"><div class="ico"><i class="fa-solid fa-compass"></i></div><h3>Build Your Future</h3><p>Get personalized career guidance[cite: 8].</p></div>
     </div>
   </div>
 </div>
 
+<!-- DASHBOARD VIEW -->
+<div id="view-dashboard" class="view-container">
+  <div class="dash-app">
+    <aside class="left panel">
+      <div class="menu">
+        <button class="on"><i class="fa-solid fa-comments"></i> Chat with Aura</button>
+        <button><i class="fa-solid fa-route"></i> Career Roadmap</button>
+        <button><i class="fa-solid fa-pie-chart"></i> Skills</button>
+        <button><i class="fa-solid fa-briefcase"></i> Opportunities</button>
+        <button><i class="fa-solid fa-book"></i> Resources</button>
+      </div>
+      <div class="card panel" style="margin-top:10px">
+        <h4>Your Progress</h4>
+        <div class="prog">
+          <div class="ring"><span>68%</span></div>
+          <p style="font-size:0.85rem">Career Growth Journey</p>
+        </div>
+      </div>
+      <div class="recent panel" style="margin-top:10px">
+        <h4 style="margin-bottom:8px">Recent Chats</h4>
+        <button class="chat-item">
+          <div class="ci"><i class="fa-solid fa-file-lines"></i></div>
+          <div><b>Web Application Security Career Path</b><small>2 hours ago</small></div>
+        </button>
+      </div>
+    </aside>
+
+    <main class="chat-main panel">
+      <div class="c-head">
+        <div><i class="fa-solid fa-atom" style="color:var(--blue)"></i><span><b>Chat with Aura</b><br><small style="color:var(--muted)">Your AI Career Coach[cite: 2]</small></span></div>
+        <span class="online"><i></i>Aura is online[cite: 2]</span>
+      </div>
+      <div class="msgs" id="msg-feed">
+        <div class="m me">
+          <div class="av" style="background:#2b97ff;display:grid;place-items:center;border-radius:50%;width:40px;height:40px">You</div>
+          <div class="bub">What skills should I learn to become a Web Application Security Engineer?[cite: 2]<time>10:24 AM ✓✓</time></div>
+        </div>
+        <div class="m">
+          <img src="https://raw.githubusercontent.com/Tajdar-Khalil/aura-ai-navigator/main/assets/aura_avatar.jpg" alt="Aura">
+          <div class="bub">
+            <p>Great question! Becoming a Web Application Security Engineer requires a mix of technical skills, hands-on practice, and continuous learning[cite: 2]. Here's a structured breakdown:</p>
+            <div class="sec">
+              <section>
+                <span class="ic" style="background:#1f6fe0"><i class="fa-solid fa-shield"></i></span>
+                <div><h5>1. Core Security Skills</h5><ul><li>Web application security fundamentals &amp; OWASP Top 10[cite: 2]</li><li>Secure coding practices (HTML, JS, Python, PHP)[cite: 2]</li></ul></div>
+              </section>
+            </div>
+            <time>10:24 AM</time>
+          </div>
+        </div>
+      </div>
+      <div class="chips">
+        <button class="chip" onclick="sendPrompt('Show me a 90-day roadmap')">Show me a 90-day roadmap</button>
+        <button class="chip" onclick="sendPrompt('Free learning resources')">Free learning resources</button>
+      </div>
+      <div class="input-area">
+        <input id="user-input" placeholder="Type your message to Aura..." onkeydown="if(event.key==='Enter')submitMsg()">
+        <button class="send" onclick="submitMsg()"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </main>
+
+    <aside class="right panel">
+      <div class="aura-profile">
+        <img src="https://raw.githubusercontent.com/Tajdar-Khalil/aura-ai-navigator/main/assets/aura_avatar.jpg" alt="Aura">
+        <h3 style="font-size:1.4rem">Aura <span style="background:var(--blue);padding:2px 6px;border-radius:6px;font-size:0.7rem">AI</span>[cite: 2]</h3>
+        <p style="color:var(--muted);font-size:0.85rem">Your Career Coach &amp; Guide[cite: 2]</p>
+      </div>
+      <div class="facts">
+        <div class="fact"><i class="fa-solid fa-microchip" style="color:var(--blue);font-size:1.2rem"></i><div><b>GPT-OSS-120B</b><small style="color:var(--muted);display:block">Advanced reasoning[cite: 1]</small></div></div>
+        <div class="fact"><i class="fa-solid fa-database" style="color:var(--cyan);font-size:1.2rem"></i><div><b>FAISS RAG</b><small style="color:var(--muted);display:block">Curated knowledge[cite: 1]</small></div></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ABOUT VIEW -->
+<div id="view-about" class="view-container">
+  <div class="wrap" style="padding:60px 0">
+    <h2 style="font-size:2.5rem;margin-bottom:20px">About AuraAI</h2>
+    <p style="color:var(--muted);font-size:1.1rem;max-width:700px;line-height:1.7">
+      Aura is an intelligent AI-agent-based career guidance application designed to help users explore career paths, identify skill gaps, and make informed decisions using CrewAI, Groq, and FAISS RAG[cite: 1, 8].
+    </p>
+  </div>
+</div>
+
+<!-- CONTACT VIEW -->
+<div id="view-contact" class="view-container">
+  <div class="wrap" style="padding:60px 0">
+    <h2 style="font-size:2.5rem;margin-bottom:20px">Contact Developer</h2>
+    <p style="color:var(--muted);font-size:1.1rem">Developer Email: <strong style="color:var(--text)">tajdarkhalil099@gmail.com</strong></p>
+  </div>
+</div>
+
+<!-- LOGIN / REGISTER MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="x" onclick="closeModal()">&times;</button>
+    <div class="seg">
+      <button id="tab-login" class="on" onclick="setAuthTab('login')">Login</button>
+      <button id="tab-register" onclick="setAuthTab('register')">Register</button>
+    </div>
+    <div id="pane-login" class="pane on">
+      <div class="field"><label>Email<input type="email" id="login-email" placeholder="you@example.com"></label></div>
+      <div class="field"><label>Password<input type="password" id="login-pass" placeholder="••••••••"></label></div>
+      <button class="btn primary lg" style="width:100%;justify-content:center;margin-top:10px" onclick="handleAuth('login')">Sign In</button>
+    </div>
+    <div id="pane-register" class="pane">
+      <div class="field"><label>Full Name<input type="text" placeholder="Your Name"></label></div>
+      <div class="field"><label>Email<input type="email" placeholder="you@example.com"></label></div>
+      <div class="field"><label>Password<input type="password" placeholder="At least 8 characters"></label></div>
+      <button class="btn primary lg" style="width:100%;justify-content:center;margin-top:10px" onclick="handleAuth('register')">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot">
+    <span>&copy; 2026 AuraAI — AI Career &amp; Skills Navigator. All rights reserved.</span>
+    <span>Designed &amp; Developed by Tajdar</span>
+  </div>
+</footer>
+
 <script>
-document.getElementById('yr').textContent = new Date().getFullYear();
+function switchView(viewId) {{
+  document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + viewId).classList.add('active');
+  window.scrollTo(0, 0);
+}}
 
-// Mobile menu
-const nav = document.getElementById('nav'), menu = document.getElementById('menu');
-menu.addEventListener('click', () => {
-  const open = nav.classList.toggle('open');
-  menu.setAttribute('aria-expanded', open);
-});
-nav.addEventListener('click', e => { if (e.target.closest('a')) nav.classList.remove('open'); });
+function enterDashboard() {{
+  switchView('dashboard');
+}}
 
-// Highlight the nav button for the section in view
-const links = [...document.querySelectorAll('nav a.link')];
-const targets = ['home','about','contact'].map(id => document.getElementById(id));
-const io = new IntersectionObserver(entries => {
-  entries.forEach(en => {
-    if (en.isIntersecting) {
-      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + en.target.id));
-    }
-  });
-}, { rootMargin: '-45% 0px -50% 0px' });
-targets.forEach(t => io.observe(t));
+function openModal(mode) {{
+  document.getElementById('overlay').classList.add('show');
+  setAuthTab(mode);
+}}
 
-// ---- Login / Register popup ----
-const overlay = document.getElementById('overlay');
-const modal = overlay.querySelector('.modal');
-const titles = {
-  login:    ['Welcome back', 'Log in to continue with Aura.'],
-  register: ['Create your account', 'Start your career journey with Aura.']
-};
-let lastFocus = null;
-
-function setMode(mode) {
-  document.getElementById('paneLogin').classList.toggle('on', mode === 'login');
-  document.getElementById('paneRegister').classList.toggle('on', mode === 'register');
-  document.getElementById('tabLogin').classList.toggle('on', mode === 'login');
-  document.getElementById('tabRegister').classList.toggle('on', mode === 'register');
-  document.getElementById('tabLogin').setAttribute('aria-selected', mode === 'login');
-  document.getElementById('tabRegister').setAttribute('aria-selected', mode === 'register');
-  document.getElementById('mTitle').textContent = titles[mode][0];
-  document.getElementById('mSub').textContent = titles[mode][1];
-  clearErrors();
-}
-function clearErrors() {
-  overlay.querySelectorAll('.err').forEach(e => e.textContent = '');
-  overlay.querySelectorAll('input.bad').forEach(i => i.classList.remove('bad'));
-}
-function openModal(mode) {
-  lastFocus = document.activeElement;
-  document.getElementById('authBody').style.display = '';
-  document.getElementById('notice').classList.remove('show');
-  setMode(mode);
-  overlay.classList.add('show');
-  overlay.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
-  nav.classList.remove('open');
-  setTimeout(() => overlay.querySelector('.pane.on input').focus(), 30);
-}
-function closeModal() {
-  overlay.classList.remove('show');
-  overlay.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
-  overlay.querySelectorAll('form').forEach(f => f.reset());
-  if (lastFocus) lastFocus.focus();
-}
-function showNotice(title, text, btnText) {
-  document.getElementById('authBody').style.display = 'none';
-  document.getElementById('nTitle').textContent = title;
-  document.getElementById('nText').textContent = text;
-  document.getElementById('nBtn').textContent = btnText;
-  document.getElementById('notice').classList.add('show');
+function closeModal() {{
+  document.getElementById('overlay').classList.remove('show');
 }
 
-// Open from Login, Register and Enter Aura
-document.querySelectorAll('[data-route]').forEach(a =>
-  a.addEventListener('click', e => {
-    e.preventDefault();
-    openModal(a.dataset.route === 'register' ? 'register' : 'login');
-  }));
+function setAuthTab(mode) {{
+  document.getElementById('pane-login').classList.toggle('on', mode === 'login');
+  document.getElementById('pane-register').classList.toggle('on', mode === 'register');
+  document.getElementById('tab-login').classList.toggle('on', mode === 'login');
+  document.getElementById('tab-register').classList.toggle('on', mode === 'register');
+}}
 
-// Close: X button, backdrop click, Escape
-document.getElementById('close').addEventListener('click', closeModal);
-overlay.addEventListener('mousedown', e => { if (e.target === overlay) closeModal(); });
-document.addEventListener('keydown', e => {
-  if (!overlay.classList.contains('show')) return;
-  if (e.key === 'Escape') closeModal();
-  if (e.key === 'Tab') {
-    const f = [...modal.querySelectorAll('button,input,a[href]')].filter(el => el.offsetParent !== null);
-    const first = f[0], last = f[f.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  }
-});
+function handleAuth(type) {{
+  closeModal();
+  switchView('dashboard');
+}}
 
-// Switch between Login and Register
-overlay.querySelectorAll('[data-mode]').forEach(b =>
-  b.addEventListener('click', () => setMode(b.dataset.mode)));
+function sendPrompt(text) {{
+  const feed = document.getElementById('msg-feed');
+  feed.innerHTML += `<div class="m me"><div class="av" style="background:#2b97ff;display:grid;place-items:center;border-radius:50%;width:40px;height:40px">You</div><div class="bub">${{text}}<time>Just now ✓✓</time></div></div>`;
+  feed.scrollTop = feed.scrollHeight;
+  
+  setTimeout(() => {{
+    feed.innerHTML += `<div class="m"><img src="https://raw.githubusercontent.com/Tajdar-Khalil/aura-ai-navigator/main/assets/aura_avatar.jpg"><div class="bub"><p>I am analyzing your request regarding "${{text}}". Let me build a customized plan for you.</p><time>Just now</time></div></div>`;
+    feed.scrollTop = feed.scrollHeight;
+  }}, 800);
+}}
 
-// Show / hide password
-overlay.querySelectorAll('.eye').forEach(btn =>
-  btn.addEventListener('click', () => {
-    const input = btn.parentElement.querySelector('input');
-    const show = input.type === 'password';
-    input.type = show ? 'text' : 'password';
-    btn.textContent = show ? 'Hide' : 'Show';
-  }));
-
-// Validation helpers
-const emailOk = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
-function fail(input, msg) {
-  input.classList.add('bad');
-  input.closest('.field').querySelector('.err').textContent = msg;
-  return false;
-}
-function validate(form, mode) {
-  clearErrors();
-  const f = form.elements;
-  let ok = true, firstBad = null;
-  const check = (cond, input, msg) => { if (!cond) { ok = fail(input, msg); firstBad = firstBad || input; } };
-  if (mode === 'register') check(f.name.value.trim().length >= 2, f.name, 'Enter your full name.');
-  check(emailOk(f.email.value.trim()), f.email, 'Enter a valid email address.');
-  check(f.password.value.length >= (mode === 'register' ? 8 : 1), f.password,
-        mode === 'register' ? 'Use at least 8 characters.' : 'Enter your password.');
-  if (mode === 'register') check(f.confirm.value === f.password.value && f.confirm.value, f.confirm, 'Passwords do not match.');
-  if (firstBad) firstBad.focus();
-  return ok;
-}
-
-// Submit handlers
-document.getElementById('paneLogin').addEventListener('submit', e => {
-  e.preventDefault();
-  if (!validate(e.target, 'login')) return;
-  showNotice('You are logged in', 'Aura is ready when you are.', 'Enter Aura');
-});
-document.getElementById('paneRegister').addEventListener('submit', e => {
-  e.preventDefault();
-  if (!validate(e.target, 'register')) return;
-  showNotice('Account created', 'Your account is ready. Log in to start chatting with Aura.', 'Go to login');
-  document.getElementById('nBtn').dataset.next = 'login';
-});
-document.getElementById('nBtn').addEventListener('click', e => {
-  if (e.target.dataset.next === 'login') { e.target.dataset.next = ''; openModal('login'); }
-  else window.location.href = '#home';
-});
-document.getElementById('forgot').addEventListener('click', e => {
-  e.preventDefault();
-  const em = document.querySelector('#paneLogin input[name=email]');
-  if (!emailOk(em.value.trim())) { clearErrors(); fail(em, 'Enter your email first, then select Forgot password.'); em.focus(); return; }
-  showNotice('Check your inbox', 'If an account exists for ' + em.value.trim() + ', a reset link is on its way.', 'Back to login');
-  document.getElementById('nBtn').dataset.next = 'login';
-});
-
-// Contact form
-document.getElementById('contactForm').addEventListener('submit', e => {
-  e.preventDefault();
-  document.getElementById('ok').style.display = 'block';
-  e.target.reset();
-});
+function submitMsg() {{
+  const input = document.getElementById('user-input');
+  if(input.value.trim()) {{
+    sendPrompt(input.value);
+    input.value = '';
+  }}
+}}
 </script>
 </body>
 </html>
 """
 
-# Render the landing page component in Streamlit
-components.html(aura_landing_html, height=900, scrolling=True)
+# Render full interactive prototype inside Streamlit
+components.html(aura_app_html, height=920, scrolling=True)
