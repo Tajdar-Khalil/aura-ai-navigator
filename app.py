@@ -211,7 +211,7 @@ footer{margin-top:auto;border-top:1px solid var(--line);background:rgba(3,10,31,
         <a class="btn primary lg" href="#" data-route="chat">&#128172; Enter Aura</a>
       </div>
       <div class="portrait">
-        <img src="https://github.com/Tajdar-Khalil/aura-ai-navigator/blob/main/assets/aura_avatar.jpg" alt="Aura, your AI career coach">
+        <img src="https://raw.githubusercontent.com/Tajdar-Khalil/aura-ai-navigator/main/assets/aura_avatar.jpg" alt="Aura, your AI career coach">
         <div class="hello">
           <strong><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z"/></svg>Hi, I'm Aura!</strong>
           <span>Your AI Career &amp; Skills Navigator</span>
@@ -275,7 +275,7 @@ footer{margin-top:auto;border-top:1px solid var(--line);background:rgba(3,10,31,
 
     <div id="authBody">
       <div class="m-head">
-        <img src="https://github.com/Tajdar-Khalil/aura-ai-navigator/blob/main/assets/aura_avatar.jpg" alt="">
+        <img src="https://raw.githubusercontent.com/Tajdar-Khalil/aura-ai-navigator/main/assets/aura_avatar.jpg" alt="">
         <div><h2 id="mTitle">Welcome back</h2><p id="mSub">Log in to continue with Aura.</p></div>
       </div>
       <div class="seg" role="tablist">
