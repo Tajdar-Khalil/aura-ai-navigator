@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.env
+.venv/
+venv/
+.streamlit/secrets.toml
+.DS_Store
+
+# Firebase service account keys — NEVER commit these
+firebase_credentials.json
+firebase_credentials.json.json
+*firebase-adminsdk*.json
