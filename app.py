@@ -386,7 +386,7 @@ function openModal(mode) {{
 
 function closeModal() {{
   document.getElementById('overlay').classList.remove('show');
-}
+}}
 
 function setAuthTab(mode) {{
   document.getElementById('pane-login').classList.toggle('on', mode === 'login');
