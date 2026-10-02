@@ -5,7 +5,7 @@ from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
 
-from agent import run_aura
+from agent import AuraAgent
 from firebase_service import (
     firebase_available,
     login_user,
