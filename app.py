@@ -446,102 +446,53 @@ def render_left_sidebar() -> None:
 
 def render_right_sidebar() -> None:
     with st.container(key="dashboard-right"):
-        # Aura card
-        aura_card_html = f"""
-        <div class="aura-card">
-            <div class="aura-pic">
-                <img src="{aura_data_uri()}" alt="Aura AI">
-            </div>
+        # Aura card (Removed multi-line indentation to prevent Markdown code-block rendering)
+        aura_card_html = (
+            '<div class="aura-card">'
+            f'<div class="aura-pic"><img src="{aura_data_uri()}" alt="Aura AI"></div>'
+            '<h2>Aura <span>AI</span></h2>'
+            '<p class="aura-role">Your Career Coach &amp; Guide</p>'
+            '<p class="muted">Smart guidance. Better decisions. A brighter future.</p>'
+            '</div>'
+        )
 
-            <h2>Aura <span>AI</span></h2>
-            <p class="aura-role">Your Career Coach &amp; Guide</p>
-            <p class="muted">
-                Smart guidance. Better decisions. A brighter future.
-            </p>
-        </div>
-        """
-
-        # unsafe_allow_html=True makes the HTML display normally.
-        # Do not put ```html or ``` inside this string.
         st.markdown(aura_card_html, unsafe_allow_html=True)
 
-        # Facts are defined and rendered only once.
         facts = [
-            (
-                "◉",
-                "Powered by GPT-OSS-120B",
-                "Advanced reasoning & analysis",
-            ),
-            (
-                "▣",
-                "RAG Knowledge Base",
-                "Curated career resources",
-            ),
-            (
-                "♣",
-                "4 External Tools",
-                "Search · Wikipedia · API · Calculator",
-            ),
-            (
-                "◌",
-                "Human-in-the-Loop",
-                "For important decisions & preferences",
-            ),
+            ("◉", "Powered by GPT-OSS-120B", "Advanced reasoning & analysis"),
+            ("▣", "RAG Knowledge Base", "Curated career resources"),
+            ("♣", "4 External Tools", "Search · Wikipedia · API · Calculator"),
+            ("◌", "Human-in-the-Loop", "For important decisions & preferences"),
         ]
 
         facts_html = '<div class="facts-card">'
-
         for icon, title, subtitle in facts:
-            facts_html += f"""
-            <div class="fact">
-                <div class="fact-icon">{icon}</div>
-                <div>
-                    <b>{title}</b>
-                    <small>{subtitle}</small>
-                </div>
-            </div>
-            """
+            # Concatenated without leading spaces
+            facts_html += (
+                '<div class="fact">'
+                f'<div class="fact-icon">{icon}</div>'
+                '<div>'
+                f'<b>{title}</b>'
+                f'<small>{subtitle}</small>'
+                '</div>'
+                '</div>'
+            )
+        facts_html += '</div>'
 
-        facts_html += "</div>"
-
-        # Render the facts section once only.
         st.markdown(facts_html, unsafe_allow_html=True)
 
         # Quick actions
-        st.markdown(
-            '<div class="quick"><h4>⚡ Quick Actions</h4>',
-            unsafe_allow_html=True,
-        )
+        st.markdown('<div class="quick"><h4>⚡ Quick Actions</h4>', unsafe_allow_html=True)
 
         actions = [
-            (
-                "Generate Career Roadmap",
-                "Generate my career roadmap",
-                "roadmap",
-            ),
-            (
-                "Analyze My Skills",
-                "Analyze my skills",
-                "skills",
-            ),
-            (
-                "Explore Job Opportunities",
-                "Explore job opportunities",
-                "opportunities",
-            ),
-            (
-                "Find Learning Resources",
-                "Find free learning resources",
-                "resources",
-            ),
+            ("Generate Career Roadmap", "Generate my career roadmap", "roadmap"),
+            ("Analyze My Skills", "Analyze my skills", "skills"),
+            ("Explore Job Opportunities", "Explore job opportunities", "opportunities"),
+            ("Find Learning Resources", "Find free learning resources", "resources"),
         ]
 
         for label, prompt, key in actions:
-            if st.button(
-                label + "  ›",
-                key=f"quick_{key}",
-                use_container_width=True,
-            ):
+            if st.button(label + "  ›", key=f"quick_{key}", use_container_width=True):
                 st.session_state.dashboard_page = "Chat with Aura"
                 _send_from_action(prompt, key)
 
