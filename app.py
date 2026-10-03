@@ -33,6 +33,7 @@ DEFAULTS = {
     "pending_approval": None,
     "auth_notice": "",
     "auth_mode": "login",
+    "notifications_read": False,
 }
 for key, value in DEFAULTS.items():
     if key not in st.session_state:
@@ -269,22 +270,21 @@ def _seed_messages() -> list[dict]:
     return []
 
 
-def _add_user_message(prompt: str) -> None:
+def _add_user_message(prompt: str, completion_key: str = "chat") -> None:
     prompt = validate_user_input(prompt)
     if not prompt:
         return
     st.session_state.messages.append({"role": "user", "content": prompt, "time": _format_time()})
-    st.session_state.profile = mark_complete(st.session_state.user, "chat")
     title = prompt if len(prompt) <= 80 else prompt[:77] + "..."
     st.session_state.profile = save_recent_chat(st.session_state.user, title, prompt)
     decision = requires_approval(prompt)
     if decision["required"]:
-        st.session_state.pending_approval = {"query": prompt, **decision}
+        st.session_state.pending_approval = {"query": prompt, "completion_key": completion_key, **decision}
         return
-    _run_and_store(prompt, approved=False)
+    _run_and_store(prompt, approved=False, completion_key=completion_key)
 
 
-def _run_and_store(prompt: str, approved: bool) -> None:
+def _run_and_store(prompt: str, approved: bool, completion_key: str = "chat") -> None:
     with st.spinner("Aura is working through your request..."):
         try:
             retrieved = retrieve_context(prompt, k=4)
@@ -293,9 +293,10 @@ def _run_and_store(prompt: str, approved: bool) -> None:
             st.session_state.memory.add("user", prompt)
             st.session_state.memory.add("assistant", safe)
             st.session_state.messages.append({"role": "assistant", "content": safe, "time": _format_time()})
+            # Progress changes only after Aura successfully completes the action.
+            st.session_state.profile = mark_complete(st.session_state.user, completion_key)
         except Exception as exc:
             st.session_state.messages.append({"role": "assistant", "content": f"I couldn't complete that request. Please try again. Technical detail: {sanitize_output(exc)}", "time": _format_time()})
-
 
 def requires_approval(prompt: str) -> dict:
     text = prompt.lower().strip()
@@ -319,11 +320,8 @@ def _render_message(message: dict) -> None:
 
 
 def _send_from_action(prompt: str, completion_key: str | None = None) -> None:
-    if completion_key:
-        st.session_state.profile = mark_complete(st.session_state.user, completion_key)
-    _add_user_message(prompt)
+    _add_user_message(prompt, completion_key or "chat")
     st.rerun()
-
 
 def render_chat_panel() -> None:
     st.markdown('<div class="panel chat-panel"><div class="chat-head"><div class="chat-title"><span class="spark">✦</span><div><b>Chat with Aura</b><div class="muted">Your AI Career Coach</div></div></div><span class="online">● &nbsp; Aura is online</span></div>', unsafe_allow_html=True)
@@ -341,7 +339,7 @@ def render_chat_panel() -> None:
             if st.button("✓ Approve and continue", key="approve", type="primary", use_container_width=True):
                 query = pending["query"]
                 st.session_state.pending_approval = None
-                _run_and_store(query, approved=True)
+                _run_and_store(query, approved=True, completion_key=pending.get("completion_key", "chat"))
                 st.rerun()
         with b:
             if st.button("✕ Reject / revise", key="reject", use_container_width=True):
@@ -372,7 +370,8 @@ def render_left_sidebar() -> None:
     profile = st.session_state.profile or get_profile(st.session_state.user)
     st.session_state.profile = profile
     items = [
-        ("Chat with Aura", "chat"), ("Career Roadmap", "roadmap"), ("Skills", "skills"), ("Opportunities", "opportunities"), ("Resources", "resources")
+        ("Chat with Aura", "chat"), ("Career Roadmap", "roadmap"), ("Skills", "skills"),
+        ("Opportunities", "opportunities"), ("Resources", "resources")
     ]
     st.markdown('<div class="side">', unsafe_allow_html=True)
     for label, key in items:
@@ -380,20 +379,33 @@ def render_left_sidebar() -> None:
         st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
         if st.button(label, key=f"side_{key}", use_container_width=True):
             st.session_state.dashboard_page = label
-            if label != "Chat with Aura":
-                st.session_state.profile = mark_complete(st.session_state.user, key)
+            # Opening a dashboard capability counts only once for that user.
+            st.session_state.profile = mark_complete(st.session_state.user, key)
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
+    profile = st.session_state.profile or profile
     progress = int(profile.get("progress", 0))
-    st.markdown(f'<div class="panel progress-card"><b>Your Progress</b><div class="progress-row" style="margin-top:12px"><div class="ring" style="--p:{progress}"><div>{progress}%</div></div><div><div>Career Growth</div><div class="muted">Journey</div></div></div></div>', unsafe_allow_html=True)
+    completed = set(profile.get("completed") or [])
+    st.markdown(
+        f'<div class="panel progress-card"><b>Your Progress</b>'
+        f'<div class="progress-row" style="margin-top:12px">'
+        f'<div class="ring" style="--p:{progress}"><div>{progress}%</div></div>'
+        f'<div><div>Career Growth</div><div class="muted">{len(completed)}/7 milestones complete</div></div>'
+        f'</div></div>', unsafe_allow_html=True)
+
     st.markdown('<div class="panel recent"><b>Recent Chats</b>', unsafe_allow_html=True)
     chats = profile.get("recent_chats") or []
     if not chats:
         st.markdown('<p class="muted" style="margin-top:12px">No conversations yet.</p>', unsafe_allow_html=True)
-    for item in chats[:4]:
-        st.markdown(f'<div class="chat-row"><b>{html.escape(item.get("title", "Conversation"))}</b><small>{html.escape(item.get("timestamp", ""))}</small></div>', unsafe_allow_html=True)
+    for index, item in enumerate(chats[:4]):
+        title = item.get("title", "Conversation")
+        prompt = item.get("prompt", title)
+        if st.button(title[:52], key=f"recent_{index}", use_container_width=True):
+            st.session_state.dashboard_page = "Chat with Aura"
+            _send_from_action(prompt, "chat")
+        st.markdown(f'<small class="recent-time">{html.escape(item.get("timestamp", ""))}</small>', unsafe_allow_html=True)
     st.markdown('</div></div>', unsafe_allow_html=True)
-
 
 def render_right_sidebar() -> None:
     email = user_email()
@@ -415,9 +427,24 @@ def render_right_sidebar() -> None:
     st.markdown('<div class="quote">✦ &nbsp; “Big dreams need a plan.<br>&nbsp;&nbsp;&nbsp;&nbsp;I\'m here to help you build yours.”<br><span style="float:right">— Aura</span></div></div>', unsafe_allow_html=True)
 
 
+def render_profile_panel() -> None:
+    profile = st.session_state.profile or get_profile(st.session_state.user)
+    progress = int(profile.get("progress", 0))
+    st.markdown(
+        f'<div class="panel profile-panel"><div class="profile-large"><img src="{avatar_url(user_email(), 160)}"/></div>'
+        f'<h2>{html.escape(user_name())}</h2><p class="muted">{html.escape(user_email())}</p>'
+        f'<div class="profile-progress"><b>Career Growth</b><strong>{progress}%</strong></div>'
+        f'<div class="progress-bar"><span style="width:{progress}%"></span></div></div>',
+        unsafe_allow_html=True,
+    )
+    if st.button("Back to Chat with Aura", key="profile_back", type="primary"):
+        st.session_state.dashboard_page = "Chat with Aura"
+        st.rerun()
+
+
 def render_dashboard_content() -> None:
     page = st.session_state.dashboard_page
-    if page == "Chat with Aura":
+    if page in ("Chat with Aura", "Profile"):
         return
     prompts = {
         "Career Roadmap": "Generate a practical career roadmap for my current goal. Ask for my target role and experience if needed.",
@@ -435,14 +462,48 @@ def render_dashboard() -> None:
     if not st.session_state.authenticated:
         navigate("Home")
         return
+
     st.session_state.profile = st.session_state.profile or get_profile(st.session_state.user)
-    st.markdown(f'<div class="topbar"><div class="brand"><div class="brand-mark">✦</div><div class="brand-name">Aura<span>AI</span></div><div class="brand-divider"></div><div class="brand-sub">AI Career &amp; Skills Navigator</div></div><div class="profile-pill"><img src="{avatar_url(user_email())}"/><span>{html.escape(user_name())}</span><span>⌄</span></div></div>', unsafe_allow_html=True)
+
+    # Dashboard header: logo, live notification menu and user profile dropdown.
+    logo_col, spacer_col, notify_col, profile_col = st.columns([2.4, 5.0, 0.55, 2.0], gap="small", vertical_alignment="center")
+    with logo_col:
+        st.markdown(
+            '<div class="topbar-brand"><div class="brand-mark">✦</div><div class="brand-name">Aura<span>AI</span></div>'
+            '<div class="brand-divider"></div><div class="brand-sub">AI Career &amp; Skills Navigator</div></div>',
+            unsafe_allow_html=True,
+        )
+    with notify_col:
+        with st.popover("🔔", use_container_width=True):
+            st.markdown("### Notifications")
+            st.success(f"Welcome back, {html.escape(user_name().split()[0])}.")
+            st.info("Your Aura workspace is ready. New accounts start at 0% progress.")
+            st.caption("Progress updates when a career capability is successfully completed.")
+            if st.button("Mark notifications as read", key="mark_notifications_read", use_container_width=True):
+                st.session_state.notifications_read = True
+                st.rerun()
+    with profile_col:
+        with st.popover(f"👤 {user_name()[:18]}  ▾", use_container_width=True):
+            st.markdown(f"### {html.escape(user_name())}")
+            st.caption(user_email())
+            st.markdown(f'<div class="profile-menu-avatar"><img src="{avatar_url(user_email(), 96)}"/></div>', unsafe_allow_html=True)
+            if st.button("View profile", key="profile_view", use_container_width=True):
+                st.session_state.dashboard_page = "Profile"
+                st.rerun()
+            if st.button("Dashboard home", key="profile_home", use_container_width=True):
+                st.session_state.dashboard_page = "Chat with Aura"
+                st.rerun()
+            if st.button("Log out", key="profile_logout", type="primary", use_container_width=True):
+                logout()
+
     left, center, right = st.columns([.95, 2.8, 1.2], gap="medium")
     with left:
         render_left_sidebar()
     with center:
         if st.session_state.dashboard_page == "Chat with Aura":
             render_chat_panel()
+        elif st.session_state.dashboard_page == "Profile":
+            render_profile_panel()
         else:
             render_dashboard_content()
     with right:

@@ -115,5 +115,12 @@ background-attachment:fixed}
   .public-brand .brand-name{font-size:18px}
   .topbar + div .stButton>button{font-size:10px!important;padding:0 4px!important;min-height:36px!important}.hero h1{font-size:34px}.eyebrow{font-size:11px}.primary-btn .stButton>button{width:100%!important}.aura-stage{width:250px}.aura-bubble{position:relative;right:auto;bottom:auto;margin:-10px auto 0;width:max-content;max-width:92%}
 }
+
+/* Dashboard profile, notification and account controls */
+.profile-menu-avatar{display:flex;justify-content:center;margin:8px 0 14px}.profile-menu-avatar img{width:72px;height:72px;border-radius:50%;border:2px solid rgba(62,150,255,.55);box-shadow:0 0 24px rgba(31,139,255,.25)}
+.profile-panel{padding:28px;min-height:360px}.profile-large{display:flex;justify-content:center;margin:6px 0 16px}.profile-large img{width:120px;height:120px;border-radius:50%;border:3px solid rgba(62,150,255,.7);box-shadow:0 0 35px rgba(31,139,255,.28)}.profile-panel h2{text-align:center;margin:0}.profile-panel>p{text-align:center}.profile-progress{display:flex;justify-content:space-between;align-items:center;margin-top:28px}.profile-progress strong{color:#67b8ff;font-size:22px}.progress-bar{height:10px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:10px 0 24px}.progress-bar span{display:block;height:100%;background:linear-gradient(90deg,#1468d6,#36a2ff);border-radius:999px;transition:width .35s ease}.recent-time{display:block;color:var(--muted);font-size:10px;margin:-8px 4px 8px}.recent [data-testid="stButton"]>button{background:transparent!important;border:0!important;padding:5px 4px!important;text-align:left!important;font-size:12px!important;box-shadow:none!important}.recent [data-testid="stButton"]>button:hover{background:rgba(31,139,255,.08)!important}
+[data-testid="stPopover"] button{border-color:rgba(62,150,255,.25)!important;background:rgba(8,31,78,.55)!important}
+[data-testid="stPopover"] [data-testid="stVerticalBlock"]{gap:.45rem}
+@media(max-width:640px){.profile-panel{padding:20px}.profile-menu-avatar img{width:60px;height:60px}}
 </style>
 """, unsafe_allow_html=True)
