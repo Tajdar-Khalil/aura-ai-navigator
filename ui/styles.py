@@ -122,5 +122,716 @@ background-attachment:fixed}
 [data-testid="stPopover"] button{border-color:rgba(62,150,255,.25)!important;background:rgba(8,31,78,.55)!important}
 [data-testid="stPopover"] [data-testid="stVerticalBlock"]{gap:.45rem}
 @media(max-width:640px){.profile-panel{padding:20px}.profile-menu-avatar img{width:60px;height:60px}}
+/* ---------- Dashboard viewport / exact reference proportions ---------- */
+.st-key-dashboard-shell{
+  height:calc(100vh - 86px)!important;
+  min-height:720px!important;
+  width:100%!important;
+  overflow:hidden!important;
+}
+.st-key-dashboard-shell > div[data-testid="stHorizontalBlock"]{
+  height:100%!important;
+  align-items:stretch!important;
+  gap:16px!important;
+}
+.st-key-dashboard-shell [data-testid="column"]{
+  min-width:0!important;
+  height:100%!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+.st-key-dashboard-shell [data-testid="column"] > div{
+  min-height:0!important;
+  height:100%!important;
+}
+
+/* Dashboard header: never allow the brand to wrap into the distorted vertical logo. */
+.topbar-brand{
+  height:64px;display:flex;align-items:center;gap:11px;white-space:nowrap;overflow:hidden;
+}
+.topbar-brand .brand-mark{font-size:30px;line-height:1;color:#3aa0ff;filter:drop-shadow(0 0 10px rgba(31,139,255,.8));flex:0 0 auto}
+.topbar-brand .brand-name{font-size:25px;font-weight:800;letter-spacing:-.03em;line-height:1;flex:0 0 auto}.topbar-brand .brand-name span{color:#1f8bff}
+.topbar-brand .brand-divider{height:30px;width:1px;background:var(--line);flex:0 0 auto}
+.topbar-brand .brand-sub{font-size:13px;color:#a9c1e6;overflow:hidden;text-overflow:ellipsis}
+
+/* Three dashboard columns */
+.st-key-dashboard-shell [data-testid="column"]:first-child{flex:1 1 19%!important}
+.st-key-dashboard-shell [data-testid="column"]:nth-child(2){flex:1 1 56%!important}
+.st-key-dashboard-shell [data-testid="column"]:nth-child(3){flex:1 1 25%!important}
+
+/* Left navigation matches the supplied dashboard: compact, stacked blue controls. */
+.st-key-dashboard-shell .side{height:100%;min-height:0;overflow:hidden}
+.st-key-dashboard-shell .side > .stButton{margin-bottom:10px}
+.st-key-dashboard-shell .side > .stButton > button{
+  height:48px!important;min-height:48px!important;border-radius:12px!important;text-align:left!important;
+  justify-content:flex-start!important;padding:0 18px!important;background:linear-gradient(180deg,rgba(18,73,151,.92),rgba(8,48,108,.94))!important;
+  border-color:rgba(61,143,255,.38)!important;font-size:13px!important;font-weight:700!important;
+}
+.st-key-dashboard-shell .side > .stButton > button:hover{background:linear-gradient(180deg,#1688ff,#0b63d8)!important}
+.st-key-dashboard-shell .side > .selected > div > button,
+.st-key-dashboard-shell .side > .selected button{background:linear-gradient(180deg,#1688ff,#0b63d8)!important;box-shadow:0 8px 24px rgba(15,108,231,.28)!important}
+.st-key-dashboard-shell .progress-card{margin-top:4px!important;border-radius:18px!important}
+.st-key-dashboard-shell .recent{min-height:0!important;overflow:auto!important}
+
+/* Center chat is the dominant panel and fills from the header to the bottom. */
+.st-key-dashboard-shell .chat-panel{
+  height:100%!important;min-height:0!important;width:100%!important;
+  display:flex!important;flex-direction:column!important;border-radius:18px!important;
+}
+.st-key-dashboard-shell .chat-head{height:72px;min-height:72px!important;flex:0 0 72px!important}
+.st-key-dashboard-shell .msg-area{
+  flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+  padding:22px 24px 14px!important;scrollbar-width:thin;
+}
+.st-key-dashboard-shell .msg-area::-webkit-scrollbar{width:7px}.st-key-dashboard-shell .msg-area::-webkit-scrollbar-thumb{background:rgba(78,151,255,.28);border-radius:10px}
+.st-key-dashboard-shell .bubble{max-width:min(88%,820px)!important}
+.st-key-dashboard-shell .welcome-bubble{margin-top:auto!important}
+.st-key-dashboard-shell .chip-row{flex:0 0 auto!important}
+.st-key-dashboard-shell .input-row{flex:0 0 auto!important}
+.st-key-dashboard-shell .chat-panel [data-testid="stForm"]{margin-top:0!important}
+.st-key-dashboard-shell .chat-panel [data-testid="stForm"] [data-testid="stHorizontalBlock"]{align-items:center!important}
+
+/* Keep the right information rail stable rather than letting it distort the chat. */
+.st-key-dashboard-shell .right-panel{height:100%!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;padding-right:2px}
+.st-key-dashboard-shell .aura-card{min-height:365px!important}
+.st-key-dashboard-shell .aura-pic{width:min(240px,82%)!important;height:250px!important}
+.st-key-dashboard-shell .aura-pic img{width:min(220px,100%)!important;height:250px!important}
+.st-key-dashboard-shell .quick{margin-top:14px!important}
+
+/* Make Streamlit's native form controls look like the reference input bar. */
+.st-key-dashboard-shell .chat-panel [data-testid="stTextInput"] input{
+  height:46px!important;border-radius:11px!important;background:rgba(3,10,31,.72)!important;
+  border:1px solid rgba(77,140,255,.28)!important;color:#f5f8ff!important;font-size:13px!important;
+}
+.st-key-dashboard-shell .chat-panel [data-testid="stTextInput"] input:focus{border-color:#299bff!important;box-shadow:0 0 0 1px #299bff!important}
+.st-key-dashboard-shell .chat-panel [data-testid="stFormSubmitButton"] button{height:46px!important;border-radius:11px!important}
+
+/* Header controls on dashboard */
+[data-testid="stPopover"] > button{height:44px!important;border-radius:10px!important;background:rgba(9,31,78,.75)!important}
+[data-testid="stPopover"] > div{background:linear-gradient(160deg,#0b2458,#061634)!important;border:1px solid rgba(62,151,255,.4)!important}
+
+@media(max-width:1250px){
+  .st-key-dashboard-shell [data-testid="column"]:nth-child(3){display:none!important}
+  .st-key-dashboard-shell [data-testid="column"]:first-child{flex-basis:240px!important;flex-grow:0!important}
+  .st-key-dashboard-shell [data-testid="column"]:nth-child(2){flex:1 1 auto!important}
+}
+@media(max-width:900px){
+  .st-key-dashboard-shell{height:auto!important;min-height:0!important;overflow:visible!important}
+  .st-key-dashboard-shell > div[data-testid="stHorizontalBlock"]{height:auto!important}
+  .st-key-dashboard-shell [data-testid="column"]{height:auto!important;display:block!important}
+  .st-key-dashboard-shell [data-testid="column"] > div{height:auto!important}
+  .st-key-dashboard-shell .chat-panel{height:calc(100vh - 110px)!important;min-height:620px!important}
+  .st-key-dashboard-shell [data-testid="column"]:first-child{display:block!important}
+  .st-key-dashboard-shell .side{height:auto!important;overflow:visible!important}
+}
+@media(max-width:640px){
+  .topbar-brand .brand-sub,.topbar-brand .brand-divider{display:none}
+  .topbar-brand .brand-name{font-size:21px}
+  .st-key-dashboard-shell .chat-panel{height:calc(100vh - 96px)!important;min-height:560px!important}
+  .st-key-dashboard-shell .chat-head{padding:0 14px!important}
+  .st-key-dashboard-shell .msg-area{padding:16px 12px 10px!important}
+  .st-key-dashboard-shell .bubble{max-width:94%!important;font-size:13px!important}
+}
+
+
+/* Streamlit-native dashboard containers: these are the actual widget parents. */
+.st-key-dashboard-chat{
+  height:100%!important;min-height:0!important;display:flex!important;flex-direction:column!important;
+  background:rgba(7,24,60,.72);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  box-shadow:0 16px 40px rgba(0,0,0,.18);padding:0!important;
+}
+.st-key-dashboard-chat > div{min-height:0!important}
+.st-key-dashboard-chat > div:first-child{flex:0 0 auto!important}
+.st-key-dashboard-messages{
+  flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+  padding:20px 22px 10px!important;scrollbar-width:thin;
+}
+.st-key-dashboard-messages::-webkit-scrollbar{width:7px}
+.st-key-dashboard-messages::-webkit-scrollbar-thumb{background:rgba(78,151,255,.28);border-radius:10px}
+.st-key-dashboard-messages .bubble{max-width:min(88%,820px)!important}
+.st-key-dashboard-left{
+  height:100%!important;min-height:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;
+}
+.st-key-dashboard-left .progress-card{flex:0 0 auto!important}
+.st-key-dashboard-left .recent{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important}
+.st-key-dashboard-right{
+  height:100%!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+}
+.st-key-dashboard-right .aura-card{background:rgba(7,24,60,.72);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 16px 40px rgba(0,0,0,.18)}
+.st-key-dashboard-right .facts-card{background:rgba(7,24,60,.62);border:1px solid var(--line);border-radius:18px;margin-top:12px;overflow:hidden}
+.st-key-dashboard-right .quick{background:rgba(7,24,60,.62);border:1px solid var(--line);border-radius:18px;margin-top:12px;padding:16px}
+.st-key-dashboard-right .quote{background:transparent;padding:16px 8px}
+.st-key-dashboard-right .stButton>button{min-height:42px!important}
+
+@media(max-width:1250px){
+  .st-key-dashboard-chat{min-height:calc(100vh - 120px)!important}
+}
+@media(max-width:900px){
+  .st-key-dashboard-chat{height:calc(100vh - 110px)!important;min-height:620px!important}
+  .st-key-dashboard-messages{min-height:0!important}
+}
+@media(max-width:640px){
+  .st-key-dashboard-chat{height:calc(100vh - 96px)!important;min-height:560px!important}
+  .st-key-dashboard-messages{padding:14px 12px 8px!important}
+}
+
+
+
+/* =========================================================
+   FINAL RESPONSIVE PASS
+   Purpose: eliminate horizontal overflow and keep the AuraAI
+   dashboard usable on phones from ~320px to tablets.
+   ========================================================= */
+
+/* Global viewport protection */
+html, body, .stApp,
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewBlockContainer"],
+.main, .block-container {
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  overflow-x:hidden !important;
+}
+.block-container {
+  padding-left:22px !important;
+  padding-right:22px !important;
+}
+
+/* Dashboard header: compact single-row reference-style header */
+.st-key-dashboard-header {
+  margin:0 -22px 14px !important;
+  padding:0 28px !important;
+  min-height:72px !important;
+  background:rgba(2,8,23,.92) !important;
+  border-bottom:1px solid rgba(77,140,255,.20) !important;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  position:relative;
+  z-index:60;
+}
+.st-key-dashboard-header > div[data-testid="stHorizontalBlock"] {
+  min-height:72px !important;
+  align-items:center !important;
+  gap:12px !important;
+}
+.st-key-dashboard-header [data-testid="column"] {
+  min-width:0 !important;
+  display:flex !important;
+  align-items:center !important;
+}
+.st-key-dashboard-header [data-testid="column"]:first-child {
+  flex:1 1 auto !important;
+}
+.st-key-dashboard-header [data-testid="column"]:nth-child(2) {
+  flex:0 0 24px !important;
+}
+.st-key-dashboard-header [data-testid="column"]:nth-child(3) {
+  flex:0 0 46px !important;
+}
+.st-key-dashboard-header [data-testid="column"]:nth-child(4) {
+  flex:0 0 190px !important;
+}
+.st-key-dashboard-header .topbar-brand {
+  width:100% !important;
+  min-width:0 !important;
+  height:64px !important;
+}
+.st-key-dashboard-header .brand-sub {
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+.st-key-dashboard-header [data-testid="stPopover"] > button {
+  width:100% !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+  white-space:nowrap !important;
+  text-overflow:ellipsis !important;
+}
+
+/* Mobile navigation blocks are hidden until the phone breakpoint */
+.st-key-mobile-dashboard-nav,
+.st-key-mobile-public-nav {
+  display:none !important;
+}
+
+/* Keep dashboard rails from creating minimum-width overflow */
+.st-key-dashboard-shell,
+.st-key-dashboard-shell > div[data-testid="stHorizontalBlock"],
+.st-key-dashboard-shell [data-testid="column"] {
+  min-width:0 !important;
+  max-width:100% !important;
+}
+.st-key-dashboard-shell .chat-panel,
+.st-key-dashboard-shell .msg-area,
+.st-key-dashboard-shell .right-panel,
+.st-key-dashboard-shell .side {
+  min-width:0 !important;
+  max-width:100% !important;
+}
+
+/* Chat controls must be allowed to shrink */
+.st-key-dashboard-chat [data-testid="stForm"] [data-testid="stHorizontalBlock"],
+.st-key-dashboard-chat [data-testid="stForm"] [data-testid="column"] {
+  min-width:0 !important;
+}
+.st-key-dashboard-chat [data-testid="stTextInput"] {
+  min-width:0 !important;
+}
+.st-key-dashboard-chat [data-testid="stTextInput"] input {
+  max-width:100% !important;
+  min-width:0 !important;
+}
+.st-key-dashboard-chat .chip-row {
+  max-width:100% !important;
+  overflow:hidden !important;
+}
+
+/* Public header desktop/mobile */
+.st-key-public-header {
+  margin:0 -22px 12px !important;
+  padding:0 22px !important;
+  border-bottom:1px solid rgba(77,140,255,.18) !important;
+  background:rgba(2,8,23,.86) !important;
+  min-height:70px !important;
+}
+.st-key-public-header > div[data-testid="stHorizontalBlock"] {
+  min-height:70px !important;
+  align-items:center !important;
+}
+.st-key-public-header [data-testid="column"] {
+  min-width:0 !important;
+}
+
+/* Make all cards and media shrink instead of pushing the viewport */
+img, video, iframe, svg, canvas {
+  max-width:100% !important;
+}
+.feature, .glass, .panel, .contact-info-card, .contact-form-card,
+.aura-card, .facts-card, .quick, .section-box {
+  min-width:0 !important;
+  max-width:100% !important;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .block-container {
+    padding-left:16px !important;
+    padding-right:16px !important;
+  }
+
+  /* Dashboard header */
+  .st-key-dashboard-header {
+    margin-left:-16px !important;
+    margin-right:-16px !important;
+    padding:0 18px !important;
+    min-height:64px !important;
+  }
+  .st-key-dashboard-header > div[data-testid="stHorizontalBlock"] {
+    min-height:64px !important;
+  }
+  .st-key-dashboard-header [data-testid="column"]:nth-child(4) {
+    flex-basis:150px !important;
+  }
+  .st-key-dashboard-header .brand-sub {
+    display:none !important;
+  }
+  .st-key-dashboard-header .brand-divider {
+    display:none !important;
+  }
+
+  /* On tablet the right information rail is hidden; chat gets the space. */
+  .st-key-dashboard-shell [data-testid="column"]:nth-child(3) {
+    display:none !important;
+  }
+  .st-key-dashboard-shell [data-testid="column"]:first-child {
+    flex:0 0 220px !important;
+  }
+  .st-key-dashboard-shell [data-testid="column"]:nth-child(2) {
+    flex:1 1 auto !important;
+    width:auto !important;
+  }
+}
+
+/* Phone */
+@media (max-width: 640px) {
+  .block-container {
+    padding-left:12px !important;
+    padding-right:12px !important;
+    padding-bottom:18px !important;
+  }
+
+  /* ---- Dashboard top navigation ---- */
+  .st-key-dashboard-header {
+    margin-left:-12px !important;
+    margin-right:-12px !important;
+    margin-bottom:8px !important;
+    padding:0 12px !important;
+    min-height:58px !important;
+    border-radius:0 !important;
+  }
+  .st-key-dashboard-header > div[data-testid="stHorizontalBlock"] {
+    min-height:58px !important;
+    height:58px !important;
+    gap:6px !important;
+  }
+  .st-key-dashboard-header [data-testid="column"]:first-child {
+    flex:1 1 auto !important;
+    width:auto !important;
+  }
+  .st-key-dashboard-header [data-testid="column"]:nth-child(2) {
+    display:none !important;
+  }
+  .st-key-dashboard-header [data-testid="column"]:nth-child(3) {
+    display:flex !important;
+    flex:0 0 42px !important;
+    width:42px !important;
+  }
+  .st-key-dashboard-header [data-testid="column"]:nth-child(4) {
+    display:flex !important;
+    flex:0 0 112px !important;
+    width:112px !important;
+  }
+  .st-key-dashboard-header .topbar-brand {
+    height:54px !important;
+    gap:7px !important;
+    overflow:hidden !important;
+  }
+  .st-key-dashboard-header .brand-mark {
+    font-size:26px !important;
+  }
+  .st-key-dashboard-header .brand-name {
+    font-size:20px !important;
+  }
+  .st-key-dashboard-header .brand-divider,
+  .st-key-dashboard-header .brand-sub {
+    display:none !important;
+  }
+  .st-key-dashboard-header [data-testid="stPopover"] > button {
+    height:40px !important;
+    min-height:40px !important;
+    padding:0 7px !important;
+    border-radius:10px !important;
+    font-size:11px !important;
+  }
+  .st-key-dashboard-header [data-testid="column"]:nth-child(3) [data-testid="stPopover"] > button {
+    font-size:18px !important;
+    padding:0 !important;
+  }
+
+  /* ---- Mobile dashboard menu ---- */
+  .st-key-mobile-dashboard-nav {
+    display:block !important;
+    margin:0 0 10px !important;
+  }
+  .st-key-mobile-dashboard-nav [data-testid="stExpander"] {
+    border:1px solid rgba(62,151,255,.28) !important;
+    border-radius:12px !important;
+    background:rgba(7,24,60,.62) !important;
+    overflow:hidden !important;
+  }
+  .st-key-mobile-dashboard-nav [data-testid="stExpander"] summary {
+    padding:11px 13px !important;
+  }
+  .st-key-mobile-dashboard-nav [data-testid="stExpanderDetails"] {
+    padding:8px 10px 12px !important;
+  }
+  .st-key-mobile-dashboard-nav [data-testid="stButton"] > button {
+    min-height:42px !important;
+    padding:0 10px !important;
+    font-size:11px !important;
+    border-radius:9px !important;
+  }
+  .mobile-progress {
+    display:flex !important;
+    justify-content:space-between !important;
+    align-items:center !important;
+    gap:10px !important;
+    margin-top:9px !important;
+    padding:10px 12px !important;
+    border:1px solid rgba(62,151,255,.20) !important;
+    border-radius:10px !important;
+    background:rgba(8,31,78,.48) !important;
+    font-size:11px !important;
+  }
+  .mobile-progress span {
+    color:var(--muted) !important;
+    white-space:nowrap !important;
+  }
+
+  /* ---- Dashboard content: chat only on phone ---- */
+  .st-key-dashboard-shell {
+    height:auto !important;
+    min-height:0 !important;
+    overflow:visible !important;
+    width:100% !important;
+  }
+  .st-key-dashboard-shell > div[data-testid="stHorizontalBlock"] {
+    display:block !important;
+    height:auto !important;
+  }
+  .st-key-dashboard-shell [data-testid="column"] {
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    display:block !important;
+    height:auto !important;
+  }
+  .st-key-dashboard-shell [data-testid="column"]:first-child,
+  .st-key-dashboard-shell [data-testid="column"]:nth-child(3) {
+    display:none !important;
+  }
+  .st-key-dashboard-shell [data-testid="column"]:nth-child(2) {
+    display:block !important;
+    flex:none !important;
+  }
+
+  .st-key-dashboard-chat {
+    width:100% !important;
+    max-width:100% !important;
+    height:calc(100dvh - 150px) !important;
+    min-height:520px !important;
+    max-height:calc(100dvh - 110px) !important;
+    border-radius:14px !important;
+  }
+  .st-key-dashboard-chat .chat-head {
+    min-height:62px !important;
+    height:62px !important;
+    padding:0 12px !important;
+  }
+  .st-key-dashboard-chat .chat-title {
+    gap:8px !important;
+    min-width:0 !important;
+  }
+  .st-key-dashboard-chat .chat-title > div {
+    min-width:0 !important;
+  }
+  .st-key-dashboard-chat .chat-title .muted {
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+  }
+  .st-key-dashboard-chat .spark {
+    font-size:23px !important;
+  }
+  .st-key-dashboard-chat .online {
+    padding:5px 8px !important;
+    font-size:9px !important;
+    flex:0 0 auto !important;
+  }
+  .st-key-dashboard-messages {
+    padding:13px 10px 7px !important;
+    min-width:0 !important;
+  }
+  .st-key-dashboard-messages .bubble {
+    max-width:96% !important;
+    padding:11px 12px !important;
+    margin-bottom:11px !important;
+    font-size:12.5px !important;
+    line-height:1.55 !important;
+    overflow-wrap:anywhere !important;
+  }
+  .st-key-dashboard-messages .section-box {
+    padding:10px !important;
+    margin:9px 0 !important;
+  }
+  .st-key-dashboard-messages .section-box ul {
+    padding-left:16px !important;
+  }
+
+  /* Quick prompt chips: wrap instead of forcing four narrow columns. */
+  .st-key-dashboard-chat .chip-row {
+    display:flex !important;
+    flex-wrap:wrap !important;
+    gap:6px !important;
+    padding:5px 8px 7px !important;
+    overflow:visible !important;
+  }
+  .st-key-dashboard-chat .chip-row [data-testid="column"] {
+    flex:1 1 calc(50% - 6px) !important;
+    width:auto !important;
+    min-width:0 !important;
+  }
+  .st-key-dashboard-chat .chip-row [data-testid="stButton"] > button {
+    min-height:36px !important;
+    padding:0 6px !important;
+    font-size:9.5px !important;
+    white-space:normal !important;
+    line-height:1.15 !important;
+  }
+
+  /* Chat input: icon, field and send button stay in one shrinkable row. */
+  .st-key-dashboard-chat [data-testid="stForm"] {
+    padding:0 8px 9px !important;
+  }
+  .st-key-dashboard-chat [data-testid="stForm"] [data-testid="stHorizontalBlock"] {
+    gap:6px !important;
+    align-items:center !important;
+  }
+  .st-key-dashboard-chat [data-testid="stForm"] [data-testid="column"]:first-child {
+    flex:0 0 28px !important;
+    width:28px !important;
+  }
+  .st-key-dashboard-chat [data-testid="stForm"] [data-testid="column"]:nth-child(2) {
+    flex:1 1 auto !important;
+    width:auto !important;
+  }
+  .st-key-dashboard-chat [data-testid="stForm"] [data-testid="column"]:nth-child(3) {
+    flex:0 0 42px !important;
+    width:42px !important;
+  }
+  .st-key-dashboard-chat [data-testid="stTextInput"] input {
+    height:42px !important;
+    font-size:12px !important;
+    padding:0 10px !important;
+  }
+  .st-key-dashboard-chat [data-testid="stFormSubmitButton"] button {
+    height:42px !important;
+    min-height:42px !important;
+    padding:0 !important;
+    font-size:16px !important;
+  }
+
+  /* Approval actions stack cleanly on narrow screens. */
+  .st-key-dashboard-chat [data-testid="stWarning"] + [data-testid="stHorizontalBlock"] {
+    flex-direction:column !important;
+  }
+
+  /* ---- Public header ---- */
+  .st-key-public-header {
+    margin-left:-12px !important;
+    margin-right:-12px !important;
+    margin-bottom:8px !important;
+    padding:0 12px !important;
+    min-height:58px !important;
+  }
+  .st-key-public-header > div[data-testid="stHorizontalBlock"] {
+    min-height:58px !important;
+    height:58px !important;
+  }
+  .st-key-public-header [data-testid="column"]:first-child {
+    flex:1 1 100% !important;
+    width:100% !important;
+  }
+  .st-key-public-header [data-testid="column"]:not(:first-child) {
+    display:none !important;
+  }
+  .st-key-public-header .public-brand {
+    height:52px !important;
+    gap:7px !important;
+  }
+  .st-key-public-header .brand-mark {
+    font-size:27px !important;
+  }
+  .st-key-public-header .brand-name {
+    font-size:21px !important;
+  }
+  .st-key-public-header .brand-divider,
+  .st-key-public-header .brand-sub {
+    display:none !important;
+  }
+
+  .st-key-mobile-public-nav {
+    display:block !important;
+    margin:0 0 10px !important;
+  }
+  .st-key-mobile-public-nav [data-testid="stExpander"] {
+    border:1px solid rgba(62,151,255,.28) !important;
+    border-radius:12px !important;
+    background:rgba(7,24,60,.62) !important;
+  }
+  .st-key-mobile-public-nav [data-testid="stButton"] > button {
+    min-height:42px !important;
+    font-size:11px !important;
+    border-radius:9px !important;
+  }
+
+  /* Home / About / Contact */
+  .hero {
+    display:block !important;
+    padding:24px 0 18px !important;
+  }
+  .hero h1 {
+    font-size:clamp(34px,10vw,44px) !important;
+    letter-spacing:-1.8px !important;
+    overflow-wrap:anywhere !important;
+  }
+  .hero-copy {
+    font-size:14px !important;
+    line-height:1.6 !important;
+  }
+  .aura-stage {
+    width:min(280px,78vw) !important;
+    margin:28px auto 40px !important;
+  }
+  .aura-bubble {
+    right:0 !important;
+    bottom:-20px !important;
+    max-width:calc(100% - 10px) !important;
+  }
+  .feature-grid, .cards {
+    grid-template-columns:1fr !important;
+  }
+  .contact-hero h2 {
+    font-size:34px !important;
+  }
+  .contact-info-card, .contact-form-card {
+    padding:18px !important;
+  }
+
+  /* Native Streamlit inputs and buttons */
+  [data-testid="stTextInput"] input,
+  [data-testid="stTextArea"] textarea,
+  [data-testid="stSelectbox"] > div {
+    max-width:100% !important;
+  }
+  [data-testid="stTextInput"] input,
+  [data-testid="stTextArea"] textarea {
+    font-size:16px !important; /* prevents iOS zoom */
+  }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .block-container {
+    padding-left:10px !important;
+    padding-right:10px !important;
+  }
+  .st-key-dashboard-header {
+    margin-left:-10px !important;
+    margin-right:-10px !important;
+    padding:0 9px !important;
+  }
+  .st-key-dashboard-header [data-testid="column"]:nth-child(3) {
+    flex-basis:38px !important;
+    width:38px !important;
+  }
+  .st-key-dashboard-header [data-testid="column"]:nth-child(4) {
+    flex-basis:96px !important;
+    width:96px !important;
+  }
+  .st-key-dashboard-header [data-testid="column"]:nth-child(4) [data-testid="stPopover"] > button {
+    font-size:10px !important;
+    padding:0 5px !important;
+  }
+  .st-key-dashboard-header .brand-name {
+    font-size:19px !important;
+  }
+  .st-key-dashboard-chat {
+    min-height:500px !important;
+    height:calc(100dvh - 145px) !important;
+  }
+  .st-key-dashboard-chat .online {
+    display:none !important;
+  }
+  .st-key-dashboard-chat .chip-row [data-testid="column"] {
+    flex-basis:100% !important;
+  }
+  .st-key-dashboard-chat .chip-row [data-testid="stButton"] > button {
+    font-size:10px !important;
+  }
+}
+
 </style>
 """, unsafe_allow_html=True)
