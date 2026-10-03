@@ -166,9 +166,7 @@ def _handle_chat_action() -> None:
         if not answer:
             raise RuntimeError("Aura returned an empty response.")
 
-        st.session_state["chat_history"].append(
-            {"role": "assistant", "content": answer}
-        )
+        st.session_state["chat_history"].append({"role": "assistant", "content": answer})
         st.session_state["chat_memory"].add("assistant", answer)
 
     except Exception as exc:
@@ -177,9 +175,7 @@ def _handle_chat_action() -> None:
             "Please check the backend configuration and try again."
         )
         st.session_state["chat_error"] = error_message
-        st.session_state["chat_history"].append(
-            {"role": "assistant", "content": error_message}
-        )
+        st.session_state["chat_history"].append({"role": "assistant", "content": error_message})
         st.session_state["chat_memory"].add("assistant", error_message)
         print(f"Aura chat error: {exc}")
 
@@ -226,11 +222,14 @@ def _inject_navigation_and_assets(
     chat_error: str | None,
 ) -> str:
     if page == "home":
-        html = html.replace("window.location.href = 'dashboard.html';", "__auraNavigate('dashboard');")
+        html = html.replace(
+            "window.location.href = 'dashboard.html';",
+            "__auraNavigate('dashboard');",
+        )
     else:
         html = html.replace(
-            'href=\"index.html\"',
-            'href=\"#\" onclick=\"__auraNavigate(\\'home\\'); return false;\"',
+            'href="index.html"',
+            'href="#" onclick="__auraNavigate(\'home\'); return false;"',
             1,
         )
 
@@ -363,7 +362,7 @@ function __auraNavigate(page, extras = {{}}) {{
 async function __auraHash(value) {{
   const bytes = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest('SHA-256', bytes);
-  return [...new Uint8Array(digest)].map((b) => b.toString(16, '0')).join('');
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }}
 
 async function __auraSubmitAuth(action, payload = {{}}) {{
@@ -510,7 +509,7 @@ if (__AURA_PAGE === 'dashboard') {{
 
       const avatar = isUser
         ? '<div class=\"av\"><svg viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"8\" r=\"4\" fill=\"#fff\" stroke=\"none\"/><path d=\"M4 21c0-4 4-6 8-6s8 2 8 6\" fill=\"#fff\" stroke=\"none\"/></svg></div>'
-        : '<img src=\"' + '{avatar_url}' + '\" alt=\"Aura\">';
+        : '<img src=\"' + {avatar_url} + '\" alt=\"Aura\">';
 
       const bubble = document.createElement('div');
       bubble.className = 'bub';
@@ -551,7 +550,6 @@ def _inject_streamlit_layout_css() -> None:
 _init_session()
 _handle_auth_action()
 _handle_chat_action()
-
 
 page = _current_page()
 html_path = DASHBOARD_FILE if page == "dashboard" else INDEX_FILE
