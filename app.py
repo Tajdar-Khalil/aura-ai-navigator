@@ -141,27 +141,47 @@ def auth_dialog():
 
 
 def render_header() -> None:
-    st.markdown('<div class="topbar"><div class="brand"><div class="brand-mark">✦</div><div class="brand-name">Aura<span>AI</span></div><div class="brand-divider"></div><div class="brand-sub">AI Career &amp; Skills Navigator</div></div></div>', unsafe_allow_html=True)
-    cols = st.columns([1, 1, 1, 1.25, 1.2, 1.2])
-    for i, label in enumerate(["Home", "About", "Contact"]):
-        with cols[i]:
-            if st.button(label, key=f"public_{label}", use_container_width=True, type="primary" if st.session_state.page == label else "secondary"):
-                navigate(label)
-    with cols[3]:
+    """Public header: logo and navigation controls share one responsive row."""
+    logo_col, home_col, about_col, contact_col, login_col, register_col = st.columns(
+        [2.35, 1, 1, 1, 1, 1], gap="small", vertical_alignment="center"
+    )
+
+    with logo_col:
+        st.markdown(
+            '<div class="public-brand"><div class="brand-mark">✦</div>'
+            '<div class="brand-name">Aura<span>AI</span></div>'
+            '<div class="brand-divider"></div>'
+            '<div class="brand-sub">AI Career &amp; Skills Navigator</div></div>',
+            unsafe_allow_html=True,
+        )
+
+    with home_col:
+        if st.button("Home", key="public_Home", use_container_width=True,
+                     type="primary" if st.session_state.page == "Home" else "secondary"):
+            navigate("Home")
+    with about_col:
+        if st.button("About", key="public_About", use_container_width=True,
+                     type="primary" if st.session_state.page == "About" else "secondary"):
+            navigate("About")
+    with contact_col:
+        if st.button("Contact", key="public_Contact", use_container_width=True,
+                     type="primary" if st.session_state.page == "Contact" else "secondary"):
+            navigate("Contact")
+    with login_col:
         if st.session_state.authenticated:
             if st.button("Dashboard", key="public_dashboard", use_container_width=True, type="primary"):
                 navigate("Dashboard")
         else:
-            if st.button("Login", key="public_login", use_container_width=True):
+            if st.button("Login", key="public_login", use_container_width=True, type="secondary"):
                 open_auth("login")
-    with cols[4]:
-        if not st.session_state.authenticated:
+    with register_col:
+        if st.session_state.authenticated:
+            if st.button(f"{initials(user_name())}  {user_name()[:10]}", key="public_logout",
+                         use_container_width=True, type="secondary"):
+                logout()
+        else:
             if st.button("Register", key="public_register", use_container_width=True, type="primary"):
                 open_auth("register")
-    with cols[5]:
-        if st.session_state.authenticated:
-            if st.button(f"{initials(user_name())}  {user_name()[:16]}", key="public_logout", use_container_width=True):
-                logout()
 
 
 def render_home() -> None:
@@ -190,8 +210,45 @@ def render_about() -> None:
 
 
 def render_contact() -> None:
-    st.markdown('<div class="section"><h2>Contact AuraAI</h2><p class="muted">Questions, feedback, or ideas for Aura? Use the contact details below.</p></div>', unsafe_allow_html=True)
-    st.markdown('<div class="glass"><b>Email</b><br><span class="muted">daniyalriazcute@gmail.com</span><br><br><b>Project</b><br><span class="muted">AuraAI — AI Career &amp; Skills Navigator</span></div>', unsafe_allow_html=True)
+    """Responsive contact section with a polished message form."""
+    st.markdown(
+        '<div class="contact-hero"><span class="eyebrow">✦ &nbsp; We would love to hear from you</span>'
+        '<h2>Contact <span class="gradient">AuraAI</span></h2>'
+        '<p class="muted">Questions, feedback, collaboration ideas, or help with the application? '
+        'Send us a message and the AuraAI team can follow up.</p></div>',
+        unsafe_allow_html=True,
+    )
+
+    left, right = st.columns([0.9, 1.35], gap="large")
+    with left:
+        st.markdown(
+            '<div class="contact-info-card">'
+            '<div class="contact-info-icon">✉</div><h3>Get in touch</h3>'
+            '<p class="muted">We welcome product feedback, UI suggestions and questions about AuraAI.</p>'
+            '<div class="contact-detail"><b>Email</b><span>daniyalriazcute@gmail.com</span></div>'
+            '<div class="contact-detail"><b>Project</b><span>AuraAI — AI Career &amp; Skills Navigator</span></div>'
+            '<div class="contact-detail"><b>Response</b><span>We will review your message and follow up as appropriate.</span></div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+    with right:
+        st.markdown('<div class="contact-form-card"><h3>Send us a message</h3><p class="muted">Fill in the form below.</p>', unsafe_allow_html=True)
+        with st.form("contact_form", clear_on_submit=True):
+            c1, c2 = st.columns(2, gap="medium")
+            with c1:
+                contact_name = st.text_input("Name", placeholder="Your name")
+            with c2:
+                contact_email = st.text_input("Email", placeholder="you@example.com")
+            subject = st.text_input("Subject", placeholder="How can we help?")
+            message = st.text_area("Message", placeholder="Write your message here...", height=170)
+            submitted = st.form_submit_button("Send message  →", type="primary", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        if submitted:
+            if not contact_name.strip() or not contact_email.strip() or not message.strip():
+                st.error("Please complete your name, email and message before sending.")
+            else:
+                st.success("Message received. Thank you for contacting AuraAI.")
 
 
 def _safe_markdown(text: str) -> str:

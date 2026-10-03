@@ -49,6 +49,18 @@ background-attachment:fixed}
   background:linear-gradient(180deg,#299bff,#0b63d8)!important;border-color:rgba(100,190,255,.65)!important;
   box-shadow:0 8px 25px rgba(14,119,239,.34)!important}
 
+/* Public header: logo + navigation live on the same line. */
+.public-brand{height:62px;display:flex;align-items:center;gap:11px;white-space:nowrap;padding-left:2px}
+.public-brand .brand-mark{font-size:31px;line-height:1;color:#3aa0ff;filter:drop-shadow(0 0 10px rgba(31,139,255,.75))}
+.public-brand .brand-name{font-size:25px;font-weight:800;letter-spacing:-.03em}.public-brand .brand-name span{color:#1f8bff}
+.public-brand .brand-divider{height:30px;width:1px;background:var(--line);margin:0 3px}
+.public-brand .brand-sub{font-size:13px;color:#a9c1e6}
+.contact-hero{padding:42px 0 22px;max-width:850px}
+.contact-hero h2{font-size:clamp(34px,5vw,52px);line-height:1.08;margin:17px 0 10px;letter-spacing:-1.8px}
+.contact-info-card,.contact-form-card{background:linear-gradient(145deg,rgba(10,36,91,.86),rgba(5,22,57,.82));border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 45px rgba(0,0,0,.2)}
+.contact-info-card{padding:28px;min-height:100%}.contact-info-card h3,.contact-form-card h3{font-size:21px;margin:0 0 7px}.contact-info-icon{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#1688ff,#0b4fa9);box-shadow:0 10px 25px rgba(31,139,255,.22);font-size:23px;margin-bottom:20px}
+.contact-detail{display:flex;flex-direction:column;gap:3px;padding:16px 0;border-bottom:1px solid rgba(77,140,255,.14)}.contact-detail:last-child{border-bottom:0}.contact-detail b{font-size:12px;color:#76b9ff;text-transform:uppercase;letter-spacing:.08em}.contact-detail span{font-size:14px;color:#dbe7ff;line-height:1.55}
+.contact-form-card{padding:28px}.contact-form-card .stTextInput,.contact-form-card .stTextArea{margin-top:3px}.contact-form-card [data-testid="stFormSubmitButton"]{margin-top:8px}
 /* Keep the public nav close to the header instead of creating a huge empty band. */
 .hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr);gap:46px;align-items:center;
   padding:42px 0 34px;min-height:0}
@@ -81,13 +93,18 @@ background-attachment:fixed}
 @media(max-width:1250px){
   .hero{grid-template-columns:1fr .82fr;gap:28px}.dash{grid-template-columns:240px minmax(0,1fr)}.right-panel{display:none}
 }
+@media(max-width:1100px){
+  .public-brand .brand-sub{display:none}.public-brand .brand-divider{display:none}
+}
 @media(max-width:900px){
   .block-container{padding:0 16px 24px!important}.topbar{margin:0 -16px 10px;padding:0 18px;min-height:64px}.brand-sub,.brand-divider{display:none}
   .hero{grid-template-columns:1fr;padding:32px 0 24px}.hero h1{font-size:clamp(38px,9vw,58px);letter-spacing:-2px}.hero-copy{font-size:16px}.aura-stage{width:min(350px,72vw);margin:26px auto 42px}.feature-grid,.cards{grid-template-columns:1fr 1fr}.dash{grid-template-columns:1fr;height:auto;min-height:0}.side{display:block}.recent{max-height:250px}.right-panel{display:none}
 }
 @media(max-width:640px){
-  .block-container{padding:0 12px 20px!important}.topbar{margin:0 -12px 8px;padding:0 14px;min-height:58px}.brand-mark{font-size:27px}.brand-name{font-size:22px}
-  /* public navigation becomes a compact horizontal strip */
+  .block-container{padding:0 12px 20px!important}
+  .public-brand{height:52px;gap:7px}.public-brand .brand-mark{font-size:26px}.public-brand .brand-name{font-size:20px}
+  .contact-hero{padding:30px 0 16px}.contact-info-card,.contact-form-card{padding:20px}.contact-hero h2{font-size:35px}
+  .topbar{margin:0 -12px 8px;padding:0 14px;min-height:58px}.brand-mark{font-size:27px}.brand-name{font-size:22px}
   .topbar + div [data-testid="stHorizontalBlock"]{gap:5px!important}
   .topbar + div .stButton>button{min-height:38px!important;padding:0 7px!important;font-size:11px!important;border-radius:9px!important}
   .hero{padding:24px 0 18px}.hero h1{font-size:40px}.hero-copy{font-size:15px;line-height:1.6}.aura-stage{width:min(300px,76vw)}.aura-bubble{right:-4px;bottom:-20px;max-width:205px;padding:11px 13px}.aura-bubble span{font-size:11px}
@@ -95,6 +112,7 @@ background-attachment:fixed}
   .chat-head{padding:0 14px}.online{padding:6px 9px;font-size:10px}.msg-area{padding:14px}.bubble{max-width:94%;font-size:13px}.chip-row{padding:0 10px 8px}.input-row{padding:0 10px 12px}
 }
 @media(max-width:420px){
+  .public-brand .brand-name{font-size:18px}
   .topbar + div .stButton>button{font-size:10px!important;padding:0 4px!important;min-height:36px!important}.hero h1{font-size:34px}.eyebrow{font-size:11px}.primary-btn .stButton>button{width:100%!important}.aura-stage{width:250px}.aura-bubble{position:relative;right:auto;bottom:auto;margin:-10px auto 0;width:max-content;max-width:92%}
 }
 </style>
