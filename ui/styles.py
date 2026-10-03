@@ -124,7 +124,8 @@ background-attachment:fixed}
 @media(max-width:640px){.profile-panel{padding:20px}.profile-menu-avatar img{width:60px;height:60px}}
 /* ---------- Dashboard viewport / exact reference proportions ---------- */
 .st-key-dashboard-shell{
-  height:calc(100vh - 86px)!important;
+  margin-top:86px!important;
+  height:calc(100vh - 100px)!important;
   min-height:720px!important;
   width:100%!important;
   overflow:hidden!important;
@@ -300,15 +301,20 @@ html, body, .stApp,
 
 /* Dashboard header: compact single-row reference-style header */
 .st-key-dashboard-header {
-  margin:0 -22px 14px !important;
+  position:fixed !important;
+  top:0 !important;
+  left:0 !important;
+  right:0 !important;
+  width:100vw !important;
+  margin:0 !important;
   padding:0 28px !important;
   min-height:72px !important;
-  background:rgba(2,8,23,.92) !important;
+  height:72px !important;
+  background:rgba(2,8,23,.94) !important;
   border-bottom:1px solid rgba(77,140,255,.20) !important;
   backdrop-filter:blur(18px);
   -webkit-backdrop-filter:blur(18px);
-  position:relative;
-  z-index:60;
+  z-index:9999 !important;
 }
 .st-key-dashboard-header > div[data-testid="stHorizontalBlock"] {
   min-height:72px !important;
@@ -423,10 +429,9 @@ img, video, iframe, svg, canvas {
 
   /* Dashboard header */
   .st-key-dashboard-header {
-    margin-left:-16px !important;
-    margin-right:-16px !important;
     padding:0 18px !important;
     min-height:64px !important;
+    height:64px !important;
   }
   .st-key-dashboard-header > div[data-testid="stHorizontalBlock"] {
     min-height:64px !important;
@@ -464,11 +469,9 @@ img, video, iframe, svg, canvas {
 
   /* ---- Dashboard top navigation ---- */
   .st-key-dashboard-header {
-    margin-left:-12px !important;
-    margin-right:-12px !important;
-    margin-bottom:8px !important;
     padding:0 12px !important;
     min-height:58px !important;
+    height:58px !important;
     border-radius:0 !important;
   }
   .st-key-dashboard-header > div[data-testid="stHorizontalBlock"] {
@@ -562,6 +565,7 @@ img, video, iframe, svg, canvas {
 
   /* ---- Dashboard content: chat only on phone ---- */
   .st-key-dashboard-shell {
+    margin-top:68px !important;
     height:auto !important;
     min-height:0 !important;
     overflow:visible !important;
