@@ -17,7 +17,7 @@ svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:
 .spark{fill:#3aa0ff;stroke:none}
 
 /* Top bar */
-.top{height:64px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--line);background:rgba(3,10,31,.7)}
+.top{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--line);background:rgba(3,10,31,.88);backdrop-filter:blur(14px)}
 .brand{display:flex;align-items:center;gap:12px}
 .brand .spark{width:32px;height:32px;filter:drop-shadow(0 0 10px rgba(31,139,255,.8))}
 .brand b{font-size:1.5rem;font-weight:800;letter-spacing:-.02em}.brand b span{color:var(--blue)}
@@ -30,7 +30,7 @@ svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:
 .av svg{width:18px;height:18px}
 
 /* Layout */
-.app{flex:1;min-height:0;display:grid;grid-template-columns:278px 1fr 350px;gap:18px;padding:18px}
+.app{position:absolute;top:64px;left:0;right:0;bottom:0;display:grid;grid-template-columns:278px 1fr 350px;gap:18px;padding:18px;min-height:0}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;min-height:0}
 aside.left{display:flex;flex-direction:column;gap:16px;overflow:auto}
 .menu{display:grid;gap:4px}
@@ -115,8 +115,49 @@ aside.right{display:flex;flex-direction:column;gap:16px;overflow:auto;min-height
 .quote{display:flex;gap:12px;padding:6px 8px;font-size:.78rem;color:#b9cdf0}
 .quote .spark{width:26px;height:26px}.quote small{display:block;text-align:right;color:var(--muted);margin-top:4px}
 
+
+/* Fixed desktop header + mobile navigation */
+.mobile-nav-toggle{display:none;width:40px;height:40px;border:1px solid var(--line);border-radius:10px;background:rgba(31,139,255,.10);color:#dceaff;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center}
+.mobile-drawer,.mobile-drawer-backdrop{display:none}
+@media(max-width:860px){
+  body{overflow:hidden}
+  .top{height:60px;padding:0 12px}
+  .top .brand{gap:8px}.top .brand .spark{width:28px;height:28px}.top .brand b{font-size:1.28rem}
+  .top .brand i{display:none}
+  .mobile-nav-toggle{display:flex;order:-1}
+  .tools{gap:6px}.bell{padding:6px}.user{padding:3px 8px 3px 3px}.user span:nth-child(2){display:none}
+  .app{top:60px;padding:8px;display:block}
+  main.chat{height:calc(100vh - 68px);width:100%;border-radius:16px}
+  .c-head{padding:12px 14px}.c-head h2{font-size:1rem}.c-head p{font-size:.75rem}
+  .online{padding:5px 9px;font-size:.72rem}
+  .msgs{padding:14px 10px;gap:12px}
+  .m{max-width:92%;gap:8px}.m img,.m .av{width:34px;height:34px}
+  .bub{padding:11px 13px;font-size:.86rem;line-height:1.5;border-radius:15px}
+  .sec{padding:11px;margin:9px 0}.sec section{gap:8px;padding:9px 0}.sec ul{font-size:.78rem;line-height:1.55}
+  .chips{justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;padding:0 10px 8px}
+  .chip{white-space:nowrap;padding:7px 11px;font-size:.74rem}
+  .input{margin:0 10px 10px;padding:6px 6px 6px 11px;border-radius:13px}
+  .input input{font-size:.85rem;min-width:0}
+  .send{width:40px;height:36px}
+  .mobile-drawer{display:block;position:fixed;top:60px;left:0;bottom:0;width:min(310px,86vw);z-index:130;background:linear-gradient(180deg,#061a45,#030a1f);border-right:1px solid var(--line);box-shadow:20px 0 50px rgba(0,0,0,.45);transform:translateX(-105%);transition:transform .22s ease;padding:14px}
+  .mobile-drawer.open{transform:translateX(0)}
+  .mobile-drawer-backdrop{display:block;position:fixed;inset:60px 0 0;z-index:120;background:rgba(0,0,0,.48);opacity:0;pointer-events:none;transition:opacity .22s ease}
+  .mobile-drawer-backdrop.open{opacity:1;pointer-events:auto}
+  .mobile-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:8px 4px 18px;border-bottom:1px solid var(--line);margin-bottom:10px}
+  .mobile-drawer-head b{font-size:1.25rem}.mobile-drawer-head button{background:none;border:0;color:#dbe7ff;font-size:1.7rem;cursor:pointer}
+  .mobile-menu{display:grid;gap:5px}
+  .mobile-menu button{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:12px;background:none;color:#d6e3ff;padding:13px 12px;text-align:left;font:500 .92rem var(--font)}
+  .mobile-menu button.on{background:linear-gradient(180deg,#1f8bff,#1468d6);color:#fff;font-weight:700}
+  .mobile-menu button span{width:22px;text-align:center}
+  .mobile-progress{margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(12,34,84,.45)}
+  .mobile-progress>b{display:block;font-size:.86rem;margin-bottom:10px}.mobile-progress div{height:8px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}.mobile-progress div span{display:block;height:100%;border-radius:99px;background:var(--blue)}.mobile-progress small{display:block;color:var(--muted);margin-top:8px;font-size:.72rem}
+}
+@media(min-width:861px){
+  .mobile-nav-toggle,.mobile-drawer,.mobile-drawer-backdrop{display:none!important}
+}
+
 @media(max-width:1250px){.app{grid-template-columns:250px 1fr}aside.right{display:none}}
-@media(max-width:860px){.app{grid-template-columns:1fr;padding:10px}aside.left{display:none}.brand i{display:none}.user span{display:none}}
+@media(max-width:860px){.app{grid-template-columns:1fr;padding:8px}aside.left{display:none}.brand i{display:none}.user span{display:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:rgba(77,140,255,.3);border-radius:8px}
 </style>
@@ -130,11 +171,25 @@ aside.right{display:flex;flex-direction:column;gap:16px;overflow:auto;min-height
 
 <header class="top">
   <a class="brand" href="index.html"><svg class="spark"><use href="#spark"/></svg><b>Aura<span>AI</span></b><i>AI Career &amp; Skills Navigator</i></a>
+  <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Open dashboard menu" aria-expanded="false">☰</button>
   <div class="tools">
     <button class="bell" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 1 1 12 0v6l2 2H4zM10 21h4"/></svg></button>
     <div class="user" tabindex="0"><span class="av"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="#fff" stroke="none"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6" fill="#fff" stroke="none"/></svg></span><span id="uname">Daniyal Riz</span>&#9662;</div>
   </div>
 </header>
+
+<div class="mobile-drawer-backdrop" id="mobileBackdrop"></div>
+<aside class="mobile-drawer" id="mobileDrawer" aria-hidden="true">
+  <div class="mobile-drawer-head"><b>AuraAI</b><button id="mobileNavClose" aria-label="Close menu">×</button></div>
+  <nav class="mobile-menu">
+    <button class="on"><span>⌂</span>Chat with Aura</button>
+    <button><span>◈</span>Career Roadmap</button>
+    <button><span>◇</span>Skills</button>
+    <button><span>▣</span>Opportunities</button>
+    <button><span>▤</span>Resources</button>
+  </nav>
+  <div class="mobile-progress"><b>Your Progress</b><div><span style="width:68%"></span></div><small>68% · Career Growth Journey</small></div>
+</aside>
 
 <div class="app">
   <aside class="left">
@@ -251,6 +306,25 @@ document.querySelectorAll('.menu button').forEach(b => b.addEventListener('click
   document.querySelectorAll('.menu button').forEach(x => x.classList.remove('on'));
   b.classList.add('on');
 }));
+const mobileDrawer = document.getElementById('mobileDrawer');
+const mobileBackdrop = document.getElementById('mobileBackdrop');
+const mobileToggle = document.getElementById('mobileNavToggle');
+const mobileClose = document.getElementById('mobileNavClose');
+function setMobileDrawer(open){
+  mobileDrawer.classList.toggle('open', open);
+  mobileBackdrop.classList.toggle('open', open);
+  mobileDrawer.setAttribute('aria-hidden', String(!open));
+  mobileToggle.setAttribute('aria-expanded', String(open));
+}
+mobileToggle.addEventListener('click', () => setMobileDrawer(true));
+mobileClose.addEventListener('click', () => setMobileDrawer(false));
+mobileBackdrop.addEventListener('click', () => setMobileDrawer(false));
+document.querySelectorAll('.mobile-menu button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.mobile-menu button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  setMobileDrawer(false);
+}));
+
 msgs.scrollTop = 0;
 </script>
 </body>
