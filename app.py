@@ -110,7 +110,7 @@ def auth_dialog():
         email = st.text_input("Email", placeholder="you@example.com")
         password = st.text_input("Password", type="password", placeholder="Your password")
         confirm = st.text_input("Confirm password", type="password") if mode == "register" else ""
-        fcm_token = st.text_input("FCM token (optional)", type="password") if mode == "register" else ""
+        fcm_token = st.text_input("FCM token (optional)", type="password") if mode == "register" else st.text_input("FCM token (optional, for login notification)", type="password")
         submitted = st.form_submit_button("Create account" if mode == "register" else "Log in", type="primary", use_container_width=True)
         forgot_submitted = (
             st.form_submit_button("Forgot password?", type="secondary", use_container_width=False)
