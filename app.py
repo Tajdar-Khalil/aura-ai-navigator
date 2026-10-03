@@ -324,108 +324,105 @@ def _send_from_action(prompt: str, completion_key: str | None = None) -> None:
     st.rerun()
 
 def render_chat_panel() -> None:
-    st.markdown('<div class="panel chat-panel"><div class="chat-head"><div class="chat-title"><span class="spark">✦</span><div><b>Chat with Aura</b><div class="muted">Your AI Career Coach</div></div></div><span class="online">● &nbsp; Aura is online</span></div>', unsafe_allow_html=True)
-    st.markdown('<div class="msg-area">', unsafe_allow_html=True)
-    if not st.session_state.messages:
-        st.markdown(f'<div class="bubble me">What should I learn to reach my career goal?<small>{_format_time()} ✓✓</small></div><div class="bubble assistant"><b style="color:#4db3ff">✦ Aura</b><br>{_dashboard_intro()}<div class="section-box"><h5>How Aura can help</h5><ul><li>Identify skill gaps and foundations</li><li>Create a career roadmap</li><li>Find learning resources</li><li>Research current opportunities when needed</li></ul></div><span class="muted">Start by telling Aura your target role and current experience.</span></div>', unsafe_allow_html=True)
-    for message in st.session_state.messages:
-        _render_message(message)
-    pending = st.session_state.pending_approval
-    st.markdown('</div>', unsafe_allow_html=True)
-    if pending:
-        st.warning(f"Human approval required\n\n{pending['reason']}\n\nRequested action: {pending['action']}")
-        a, b = st.columns(2)
-        with a:
-            if st.button("✓ Approve and continue", key="approve", type="primary", use_container_width=True):
-                query = pending["query"]
-                st.session_state.pending_approval = None
-                _run_and_store(query, approved=True, completion_key=pending.get("completion_key", "chat"))
-                st.rerun()
-        with b:
-            if st.button("✕ Reject / revise", key="reject", use_container_width=True):
-                st.session_state.pending_approval = None
-                st.session_state.messages.append({"role":"assistant","content":"No problem. I will not proceed with that action. Tell me how you would like to adjust the request.","time":_format_time()})
-                st.rerun()
-    chip_cols = st.columns(4)
-    chips = [("Show me a 90-day roadmap", "roadmap"), ("Free learning resources", "resources"), ("Compare AppSec vs GRC", "skills"), ("Help me with job applications", "opportunities")]
-    for col, (label, key) in zip(chip_cols, chips):
-        with col:
-            if st.button(label, key=f"chip_{key}", use_container_width=True):
-                _send_from_action(label, key)
-    with st.form("chat_form", clear_on_submit=True):
-        cols = st.columns([.08, .84, .08])
-        with cols[0]:
-            st.markdown("📎")
-        with cols[1]:
-            prompt = st.text_input("Message", placeholder="Type your message to Aura...", label_visibility="collapsed")
-        with cols[2]:
-            send = st.form_submit_button("➤", use_container_width=True, type="primary")
-    st.markdown('</div>', unsafe_allow_html=True)
-    if send and prompt:
-        _add_user_message(prompt)
-        st.rerun()
+    # A real Streamlit container is used so CSS can control the chat as one
+    # viewport-sized panel instead of relying on HTML wrappers between widgets.
+    with st.container(key="dashboard-chat"):
+        st.markdown('<div class="chat-head"><div class="chat-title"><span class="spark">✦</span><div><b>Chat with Aura</b><div class="muted">Your AI Career Coach</div></div></div><span class="online">● &nbsp; Aura is online</span></div>', unsafe_allow_html=True)
+        with st.container(key="dashboard-messages"):
+            if not st.session_state.messages:
+                st.markdown(f'<div class="bubble assistant welcome-bubble"><b style="color:#4db3ff">✦ Aura</b><br>{_dashboard_intro()}<div class="section-box"><h5>How Aura can help</h5><ul><li>Identify skill gaps and foundations</li><li>Create a career roadmap</li><li>Find learning resources</li><li>Research current opportunities when needed</li></ul></div><span class="muted">Start by telling Aura your target role and current experience.</span></div>', unsafe_allow_html=True)
+            for message in st.session_state.messages:
+                _render_message(message)
 
+        pending = st.session_state.pending_approval
+        if pending:
+            st.warning(f"Human approval required\n\n{pending['reason']}\n\nRequested action: {pending['action']}")
+            a, b = st.columns(2)
+            with a:
+                if st.button("✓ Approve and continue", key="approve", type="primary", use_container_width=True):
+                    query = pending["query"]
+                    st.session_state.pending_approval = None
+                    _run_and_store(query, approved=True, completion_key=pending.get("completion_key", "chat"))
+                    st.rerun()
+            with b:
+                if st.button("✕ Reject / revise", key="reject", use_container_width=True):
+                    st.session_state.pending_approval = None
+                    st.session_state.messages.append({"role":"assistant","content":"No problem. I will not proceed with that action. Tell me how you would like to adjust the request.","time":_format_time()})
+                    st.rerun()
+
+        chip_cols = st.columns(4)
+        chips = [("Show me a 90-day roadmap", "roadmap"), ("Free learning resources", "resources"), ("Compare AppSec vs GRC", "skills"), ("Help me with job applications", "opportunities")]
+        for col, (label, key) in zip(chip_cols, chips):
+            with col:
+                if st.button(label, key=f"chip_{key}", use_container_width=True):
+                    _send_from_action(label, key)
+
+        with st.form("chat_form", clear_on_submit=True):
+            cols = st.columns([.08, .84, .08])
+            with cols[0]:
+                st.markdown("📎")
+            with cols[1]:
+                prompt = st.text_input("Message", placeholder="Type your message to Aura...", label_visibility="collapsed")
+            with cols[2]:
+                send = st.form_submit_button("➤", use_container_width=True, type="primary")
+        if send and prompt:
+            _add_user_message(prompt)
+            st.rerun()
 
 def render_left_sidebar() -> None:
     profile = st.session_state.profile or get_profile(st.session_state.user)
     st.session_state.profile = profile
     items = [
-        ("Chat with Aura", "chat"), ("Career Roadmap", "roadmap"), ("Skills", "skills"),
-        ("Opportunities", "opportunities"), ("Resources", "resources")
+        ("⌂  Chat with Aura", "chat"), ("▱  Career Roadmap", "roadmap"), ("◇  Skills", "skills"),
+        ("▣  Opportunities", "opportunities"), ("▤  Resources", "resources")
     ]
-    st.markdown('<div class="side">', unsafe_allow_html=True)
-    for label, key in items:
-        cls = "selected" if st.session_state.dashboard_page == label else ""
-        st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
-        if st.button(label, key=f"side_{key}", use_container_width=True):
-            st.session_state.dashboard_page = label
-            # Opening a dashboard capability counts only once for that user.
-            st.session_state.profile = mark_complete(st.session_state.user, key)
-            st.rerun()
+    with st.container(key="dashboard-left"):
+        for label, key in items:
+            selected = st.session_state.dashboard_page == label.split("  ", 1)[-1]
+            if st.button(label, key=f"side_{key}", use_container_width=True, type="primary" if selected else "secondary"):
+                st.session_state.dashboard_page = label.split("  ", 1)[-1]
+                st.session_state.profile = mark_complete(st.session_state.user, key)
+                st.rerun()
+
+        progress = int(profile.get("progress", 0))
+        completed = set(profile.get("completed") or [])
+        st.markdown(
+            f'<div class="progress-card"><b>Your Progress</b>'
+            f'<div class="progress-row" style="margin-top:12px">'
+            f'<div class="ring" style="--p:{progress}"><div>{progress}%</div></div>'
+            f'<div><div>Career Growth</div><div class="muted">{len(completed)}/7 milestones complete</div></div>'
+            f'</div></div>', unsafe_allow_html=True)
+
+        st.markdown('<div class="recent"><b>Recent Chats</b>', unsafe_allow_html=True)
+        chats = profile.get("recent_chats") or []
+        if not chats:
+            st.markdown('<p class="muted" style="margin-top:12px">No conversations yet.</p>', unsafe_allow_html=True)
+        for index, item in enumerate(chats[:4]):
+            title = item.get("title", "Conversation")
+            prompt = item.get("prompt", title)
+            if st.button(title[:52], key=f"recent_{index}", use_container_width=True):
+                st.session_state.dashboard_page = "Chat with Aura"
+                _send_from_action(prompt, "chat")
+            st.markdown(f'<small class="recent-time">{html.escape(item.get("timestamp", ""))}</small>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    profile = st.session_state.profile or profile
-    progress = int(profile.get("progress", 0))
-    completed = set(profile.get("completed") or [])
-    st.markdown(
-        f'<div class="panel progress-card"><b>Your Progress</b>'
-        f'<div class="progress-row" style="margin-top:12px">'
-        f'<div class="ring" style="--p:{progress}"><div>{progress}%</div></div>'
-        f'<div><div>Career Growth</div><div class="muted">{len(completed)}/7 milestones complete</div></div>'
-        f'</div></div>', unsafe_allow_html=True)
-
-    st.markdown('<div class="panel recent"><b>Recent Chats</b>', unsafe_allow_html=True)
-    chats = profile.get("recent_chats") or []
-    if not chats:
-        st.markdown('<p class="muted" style="margin-top:12px">No conversations yet.</p>', unsafe_allow_html=True)
-    for index, item in enumerate(chats[:4]):
-        title = item.get("title", "Conversation")
-        prompt = item.get("prompt", title)
-        if st.button(title[:52], key=f"recent_{index}", use_container_width=True):
-            st.session_state.dashboard_page = "Chat with Aura"
-            _send_from_action(prompt, "chat")
-        st.markdown(f'<small class="recent-time">{html.escape(item.get("timestamp", ""))}</small>', unsafe_allow_html=True)
-    st.markdown('</div></div>', unsafe_allow_html=True)
-
 def render_right_sidebar() -> None:
-    email = user_email()
-    img = avatar_url(email)
-    st.markdown('<div class="right-panel">', unsafe_allow_html=True)
-    st.markdown(f'<div class="panel aura-card"><div class="aura-pic"><img src="{aura_data_uri()}"/></div><h2>Aura <span>AI</span></h2><div>Your Career Coach &amp; Guide</div><p class="muted">Smart guidance. Better decisions. A brighter future.</p></div>', unsafe_allow_html=True)
-    facts = [("◉", "Powered by GPT-OSS-120B", "Advanced reasoning & analysis"), ("▣", "RAG Knowledge Base", "Curated career resources"), ("♣", "4 External Tools", "Search · Wikipedia · API · Calculator"), ("◌", "Human-in-the-Loop", "For important decisions & preferences")]
-    st.markdown('<div class="panel">', unsafe_allow_html=True)
-    for icon, title, sub in facts:
-        st.markdown(f'<div class="fact"><div class="fact-icon">{icon}</div><div><b>{title}</b><small>{sub}</small></div></div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('<div class="panel quick"><h4>⚡ Quick Actions</h4>', unsafe_allow_html=True)
-    actions = [("Generate Career Roadmap", "Generate my career roadmap", "roadmap"), ("Analyze My Skills", "Analyze my skills", "skills"), ("Explore Job Opportunities", "Explore job opportunities", "opportunities"), ("Find Learning Resources", "Find free learning resources", "resources")]
-    for label, prompt, key in actions:
-        if st.button(label + "  ›", key=f"quick_{key}", use_container_width=True):
-            st.session_state.dashboard_page = "Chat with Aura"
-            _send_from_action(prompt, key)
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('<div class="quote">✦ &nbsp; “Big dreams need a plan.<br>&nbsp;&nbsp;&nbsp;&nbsp;I\'m here to help you build yours.”<br><span style="float:right">— Aura</span></div></div>', unsafe_allow_html=True)
-
+    with st.container(key="dashboard-right"):
+        st.markdown('<div class="aura-card">', unsafe_allow_html=True)
+        st.markdown(f'<div class="aura-pic"><img src="{aura_data_uri()}"/></div><h2>Aura <span>AI</span></h2><div>Your Career Coach &amp; Guide</div><p class="muted">Smart guidance. Better decisions. A brighter future.</p></div>', unsafe_allow_html=True)
+        st.markdown('<div class="facts-card">', unsafe_allow_html=True)
+        facts = [("◉", "Powered by GPT-OSS-120B", "Advanced reasoning & analysis"), ("▣", "RAG Knowledge Base", "Curated career resources"), ("♣", "4 External Tools", "Search · Wikipedia · API · Calculator"), ("◌", "Human-in-the-Loop", "For important decisions & preferences")]
+        for icon, title, sub in facts:
+            st.markdown(f'<div class="fact"><div class="fact-icon">{icon}</div><div><b>{title}</b><small>{sub}</small></div></div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div class="quick"><h4>⚡ Quick Actions</h4>', unsafe_allow_html=True)
+        actions = [("Generate Career Roadmap", "Generate my career roadmap", "roadmap"), ("Analyze My Skills", "Analyze my skills", "skills"), ("Explore Job Opportunities", "Explore job opportunities", "opportunities"), ("Find Learning Resources", "Find free learning resources", "resources")]
+        for label, prompt, key in actions:
+            if st.button(label + "  ›", key=f"quick_{key}", use_container_width=True):
+                st.session_state.dashboard_page = "Chat with Aura"
+                _send_from_action(prompt, key)
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("<div class=\"quote\">✦ &nbsp; “Big dreams need a plan.<br>&nbsp;&nbsp;&nbsp;&nbsp;I'm here to help you build yours.”<br><span style=\"float:right\">— Aura</span></div>", unsafe_allow_html=True)
 
 def render_profile_panel() -> None:
     profile = st.session_state.profile or get_profile(st.session_state.user)
@@ -496,18 +493,21 @@ def render_dashboard() -> None:
             if st.button("Log out", key="profile_logout", type="primary", use_container_width=True):
                 logout()
 
-    left, center, right = st.columns([.95, 2.8, 1.2], gap="medium")
-    with left:
-        render_left_sidebar()
-    with center:
-        if st.session_state.dashboard_page == "Chat with Aura":
-            render_chat_panel()
-        elif st.session_state.dashboard_page == "Profile":
-            render_profile_panel()
-        else:
-            render_dashboard_content()
-    with right:
-        render_right_sidebar()
+    # One fixed-height dashboard shell keeps the three columns aligned and lets the
+    # center chat occupy the full viewport height, like the supplied reference UI.
+    with st.container(key="dashboard-shell"):
+        left, center, right = st.columns([1.00, 3.05, 1.38], gap="medium")
+        with left:
+            render_left_sidebar()
+        with center:
+            if st.session_state.dashboard_page == "Chat with Aura":
+                render_chat_panel()
+            elif st.session_state.dashboard_page == "Profile":
+                render_profile_panel()
+            else:
+                render_dashboard_content()
+        with right:
+            render_right_sidebar()
 
 
 # Public page header only. Dashboard gets the exact dashboard header inside its own layout.
@@ -523,4 +523,5 @@ elif st.session_state.page == "Contact":
 elif st.session_state.page == "Dashboard":
     render_dashboard()
 
-st.markdown('<div class="footer"><span>© 2026 AuraAI. All rights reserved.</span><span>AI Career &amp; Skills Navigator · Built with CrewAI, Groq, RAG &amp; Firebase</span></div>', unsafe_allow_html=True)
+if st.session_state.page != "Dashboard":
+    st.markdown('<div class="footer"><span>© 2026 AuraAI. All rights reserved.</span><span>AI Career &amp; Skills Navigator · Built with CrewAI, Groq, RAG &amp; Firebase</span></div>', unsafe_allow_html=True)
