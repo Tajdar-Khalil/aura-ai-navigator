@@ -17,6 +17,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+
 ROOT_DIR = Path(__file__).resolve().parent
 INDEX_FILE = ROOT_DIR / "index.html"
 DASHBOARD_FILE = ROOT_DIR / "dashboard.html"
@@ -33,7 +34,7 @@ def _param(name: str, default: str = "") -> str:
     value = st.query_params.get(name, default)
 
     if isinstance(value, list):
-        return value[0] if value else default
+        return str(value[0]) if value else default
 
     return str(value)
 
@@ -94,6 +95,7 @@ def _handle_auth_action() -> None:
                 "message": "Please enter your full name.",
                 "next": "login",
             }
+
         elif not EMAIL_PATTERN.fullmatch(email):
             feedback = {
                 "mode": "register",
@@ -101,6 +103,7 @@ def _handle_auth_action() -> None:
                 "message": "Please enter a valid email address.",
                 "next": "login",
             }
+
         elif not HASH_PATTERN.fullmatch(password_hash):
             feedback = {
                 "mode": "register",
@@ -108,6 +111,7 @@ def _handle_auth_action() -> None:
                 "message": "Password was not submitted correctly. Please try again.",
                 "next": "login",
             }
+
         elif email in users:
             feedback = {
                 "mode": "login",
@@ -115,6 +119,7 @@ def _handle_auth_action() -> None:
                 "message": "This email is already registered. Please log in.",
                 "next": "login",
             }
+
         else:
             users[email] = {
                 "name": name,
@@ -138,6 +143,7 @@ def _handle_auth_action() -> None:
                 "message": "Please enter a valid email address.",
                 "next": "login",
             }
+
         elif not HASH_PATTERN.fullmatch(password_hash):
             feedback = {
                 "mode": "login",
@@ -145,6 +151,7 @@ def _handle_auth_action() -> None:
                 "message": "Please enter your password.",
                 "next": "login",
             }
+
         elif not user or user.get("password_hash") != password_hash:
             feedback = {
                 "mode": "login",
@@ -152,6 +159,7 @@ def _handle_auth_action() -> None:
                 "message": "Invalid email or password.",
                 "next": "login",
             }
+
         else:
             st.session_state["auth_user"] = {
                 "name": user["name"],
@@ -183,9 +191,7 @@ def _handle_chat_action() -> None:
     if not message or not nonce:
         return
 
-    previous_nonce = st.session_state.get("last_chat_nonce")
-
-    if nonce == previous_nonce:
+    if nonce == st.session_state.get("last_chat_nonce"):
         _clear_query_params("dashboard")
         st.rerun()
         return
@@ -242,7 +248,10 @@ def _handle_chat_action() -> None:
             }
         )
 
-        st.session_state["chat_memory"].add("assistant", error_message)
+        st.session_state["chat_memory"].add(
+            "assistant",
+            error_message,
+        )
 
         print(f"Aura chat error: {exc}")
 
@@ -253,8 +262,10 @@ def _handle_chat_action() -> None:
 def _read_text(path: Path, label: str) -> str | None:
     try:
         return path.read_text(encoding="utf-8")
+
     except FileNotFoundError:
         st.error(f"Missing required file: `{label}` ({path.name}).")
+
     except OSError as exc:
         st.error(f"Unable to read `{label}` ({path.name}): {exc}")
 
@@ -263,10 +274,14 @@ def _read_text(path: Path, label: str) -> str | None:
 
 def _avatar_data_url() -> str | None:
     try:
-        encoded = base64.b64encode(AVATAR_FILE.read_bytes()).decode("ascii")
+        encoded = base64.b64encode(
+            AVATAR_FILE.read_bytes()
+        ).decode("ascii")
+
     except FileNotFoundError:
         st.error("Missing required asset: `assets/aura_avatar.jpg`.")
         return None
+
     except OSError as exc:
         st.error(f"Unable to read `assets/aura_avatar.jpg`: {exc}")
         return None
@@ -313,7 +328,10 @@ def _inject_navigation_and_assets(
             1,
         )
 
-    html = html.replace("aura_avatar.jpg", avatar_url)
+    html = html.replace(
+        "aura_avatar.jpg",
+        avatar_url,
+    )
 
     responsive_style = """
 <style>
@@ -322,9 +340,6 @@ body {
     width: 100%;
     max-width: 100%;
     min-width: 0;
-}
-
-body {
     margin: 0;
     overflow-x: hidden;
 }
@@ -336,29 +351,52 @@ canvas {
     max-width: 100%;
 }
 
-@media (max-width: 640px) {
+.wrap {
+    width: min(100%, 1440px) !important;
+    margin-inline: auto !important;
+}
+
+@media (max-width: 960px) {
     .wrap {
-        width: min(100%, calc(100% - 24px)) !important;
+        width: min(100%, calc(100% - 32px)) !important;
     }
 
     .hero {
         grid-template-columns: 1fr !important;
         gap: 24px !important;
-        padding-top: 32px !important;
+        padding-top: 36px !important;
     }
 
     .portrait {
-        width: min(320px, 82vw) !important;
+        width: min(360px, 80vw) !important;
         margin-inline: auto !important;
     }
 
-    .features {
+    .features,
+    .about-grid,
+    .contact-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+}
+
+@media (max-width: 560px) {
+    .wrap {
+        width: calc(100% - 24px) !important;
+    }
+
+    .features,
+    .about-grid,
+    .contact-grid {
         grid-template-columns: 1fr !important;
     }
 
-    .contact-grid,
-    .about-grid {
-        grid-template-columns: 1fr !important;
+    h1 {
+        font-size: clamp(2.2rem, 12vw, 3.5rem) !important;
+    }
+
+    .hello {
+        right: 0 !important;
+        bottom: -24px !important;
     }
 }
 </style>
@@ -458,7 +496,7 @@ aside.right,
 
     .online {
         padding: 6px 9px !important;
-        font-size: .72rem !important;
+        font-size: 0.72rem !important;
     }
 
     .m {
@@ -556,199 +594,183 @@ const __auraSetFrameHeight = () => {{
     window.parent.postMessage(
         {{
             isStreamlitMessage: true,
-            type: "streamlit:setFrameHeight",
+            type: 'streamlit:setFrameHeight',
             height
         }},
-        "*"
+        '*'
     );
 }};
 
-window.addEventListener("load", __auraSetFrameHeight);
-window.addEventListener("resize", __auraSetFrameHeight);
+window.addEventListener('load', __auraSetFrameHeight);
+window.addEventListener('resize', __auraSetFrameHeight);
 
-if ("ResizeObserver" in window && document.body) {{
+if ('ResizeObserver' in window && document.body) {{
     new ResizeObserver(__auraSetFrameHeight).observe(document.body);
 }}
 
-if (__AURA_PAGE === "home") {{
-    const loginForm = document.getElementById("paneLogin");
-    const registerForm = document.getElementById("paneRegister");
-    const noticeButton = document.getElementById("nBtn");
+if (__AURA_PAGE === 'home') {{
+    const loginForm = document.getElementById('paneLogin');
+    const registerForm = document.getElementById('paneRegister');
+    const noticeButton = document.getElementById('nBtn');
 
-    if (loginForm && typeof validate === "function") {{
-        loginForm.addEventListener(
-            "submit",
-            async (event) => {{
-                event.preventDefault();
-                event.stopImmediatePropagation();
+    if (loginForm && typeof validate === 'function') {{
+        loginForm.addEventListener('submit', async (event) => {{
+            event.preventDefault();
+            event.stopImmediatePropagation();
 
-                if (!validate(loginForm, "login")) return;
+            if (!validate(loginForm, 'login')) return;
 
-                const email = loginForm.elements.email.value
-                    .trim()
-                    .toLowerCase();
+            const email = loginForm.elements.email.value
+                .trim()
+                .toLowerCase();
 
-                const passwordHash = await __auraHash(
-                    loginForm.elements.password.value
-                );
+            const passwordHash = await __auraHash(
+                loginForm.elements.password.value
+            );
 
-                __auraSubmitAuth("login", {{
-                    email,
-                    password_hash: passwordHash
-                }});
-            }},
-            true
-        );
+            __auraSubmitAuth('login', {{
+                email,
+                password_hash: passwordHash
+            }});
+        }}, true);
     }}
 
-    if (registerForm && typeof validate === "function") {{
-        registerForm.addEventListener(
-            "submit",
-            async (event) => {{
-                event.preventDefault();
-                event.stopImmediatePropagation();
+    if (registerForm && typeof validate === 'function') {{
+        registerForm.addEventListener('submit', async (event) => {{
+            event.preventDefault();
+            event.stopImmediatePropagation();
 
-                if (!validate(registerForm, "register")) return;
+            if (!validate(registerForm, 'register')) return;
 
-                const name = registerForm.elements.name.value.trim();
-                const email = registerForm.elements.email.value
-                    .trim()
-                    .toLowerCase();
+            const name = registerForm.elements.name.value.trim();
+            const email = registerForm.elements.email.value
+                .trim()
+                .toLowerCase();
 
-                const passwordHash = await __auraHash(
-                    registerForm.elements.password.value
-                );
+            const passwordHash = await __auraHash(
+                registerForm.elements.password.value
+            );
 
-                __auraSubmitAuth("register", {{
-                    name,
-                    email,
-                    password_hash: passwordHash
-                }});
-            }},
-            true
-        );
+            __auraSubmitAuth('register', {{
+                name,
+                email,
+                password_hash: passwordHash
+            }});
+        }}, true);
     }}
 
-    document.querySelectorAll("[data-route]").forEach((link) => {{
-        link.addEventListener(
-            "click",
-            (event) => {{
-                event.preventDefault();
-                event.stopImmediatePropagation();
+    document.querySelectorAll('[data-route]').forEach((link) => {{
+        link.addEventListener('click', (event) => {{
+            event.preventDefault();
+            event.stopImmediatePropagation();
 
-                if (
-                    link.dataset.route === "chat" &&
-                    __AURA_AUTHENTICATED
-                ) {{
-                    __auraNavigate("dashboard");
-                    return;
-                }}
+            if (
+                link.dataset.route === 'chat' &&
+                __AURA_AUTHENTICATED
+            ) {{
+                __auraNavigate('dashboard');
+                return;
+            }}
 
-                openModal(
-                    link.dataset.route === "register"
-                        ? "register"
-                        : "login"
-                );
-            }},
-            true
-        );
+            openModal(
+                link.dataset.route === 'register'
+                    ? 'register'
+                    : 'login'
+            );
+        }}, true);
     }});
 
     if (noticeButton) {{
-        noticeButton.addEventListener(
-            "click",
-            (event) => {{
-                event.preventDefault();
-                event.stopImmediatePropagation();
+        noticeButton.addEventListener('click', (event) => {{
+            event.preventDefault();
+            event.stopImmediatePropagation();
 
-                if (noticeButton.dataset.next === "login") {{
-                    noticeButton.dataset.next = "";
-                    openModal("login");
-                }} else {{
-                    __auraNavigate("dashboard");
-                }}
-            }},
-            true
-        );
+            if (noticeButton.dataset.next === 'login') {{
+                noticeButton.dataset.next = '';
+                openModal('login');
+            }} else {{
+                __auraNavigate('dashboard');
+            }}
+        }}, true);
     }}
 
     if (__AURA_FEEDBACK && __AURA_FEEDBACK.message) {{
-        openModal(__AURA_FEEDBACK.mode || "login");
+        openModal(__AURA_FEEDBACK.mode || 'login');
 
         showNotice(
-            __AURA_FEEDBACK.title || "Authentication update",
+            __AURA_FEEDBACK.title || 'Authentication update',
             __AURA_FEEDBACK.message,
-            __AURA_FEEDBACK.next === "login"
-                ? "Back to login"
-                : "Enter Aura"
+            __AURA_FEEDBACK.next === 'login'
+                ? 'Back to login'
+                : 'Enter Aura'
         );
 
         if (noticeButton) {{
             noticeButton.dataset.next =
-                __AURA_FEEDBACK.next || "login";
+                __AURA_FEEDBACK.next || 'login';
         }}
     }}
 }}
 
-if (__AURA_PAGE === "dashboard") {{
+if (__AURA_PAGE === 'dashboard') {{
     const fullName =
-        (__AURA_AUTH_USER.name || "").trim() || "Aura User";
+        (__AURA_AUTH_USER.name || '').trim() || 'Aura User';
 
     const firstName =
-        fullName.split(/\\s+/)[0] || "Friend";
+        fullName.split(/\\s+/)[0] || 'Friend';
 
-    const userNameElement = document.getElementById("uname");
+    const userNameElement = document.getElementById('uname');
 
     if (userNameElement) {{
         userNameElement.textContent = fullName;
     }}
 
-    document.querySelectorAll(".un").forEach((element) => {{
+    document.querySelectorAll('.un').forEach((element) => {{
         element.textContent = firstName;
     }});
 
-    const userChip = document.querySelector(".user");
+    const userChip = document.querySelector('.user');
 
     if (userChip && __AURA_AUTH_USER.email) {{
         userChip.title = __AURA_AUTH_USER.email;
     }}
 
-    const tools = document.querySelector(".tools");
+    const tools = document.querySelector('.tools');
 
-    if (tools && !document.getElementById("logoutBtn")) {{
-        const logoutButton = document.createElement("button");
+    if (tools && !document.getElementById('logoutBtn')) {{
+        const logoutButton = document.createElement('button');
 
-        logoutButton.id = "logoutBtn";
-        logoutButton.type = "button";
-        logoutButton.className = "btn";
-        logoutButton.textContent = "Logout";
-        logoutButton.style.padding = "8px 14px";
-        logoutButton.style.borderRadius = "10px";
+        logoutButton.id = 'logoutBtn';
+        logoutButton.type = 'button';
+        logoutButton.className = 'btn';
+        logoutButton.textContent = 'Logout';
+        logoutButton.style.padding = '8px 14px';
+        logoutButton.style.borderRadius = '10px';
         logoutButton.style.border =
-            "1px solid rgba(77,140,255,.35)";
+            '1px solid rgba(77,140,255,.35)';
         logoutButton.style.background =
-            "rgba(31,139,255,.12)";
-        logoutButton.style.cursor = "pointer";
+            'rgba(31,139,255,.12)';
+        logoutButton.style.cursor = 'pointer';
 
         logoutButton.addEventListener(
-            "click",
-            () => __auraSubmitAuth("logout")
+            'click',
+            () => __auraSubmitAuth('logout')
         );
 
         tools.appendChild(logoutButton);
     }}
 
     window.__auraSubmitChat = function(message) {{
-        const cleanMessage = String(message || "").trim();
+        const cleanMessage = String(message || '').trim();
 
         if (!cleanMessage) return;
 
         const target = new URL(window.parent.location.href);
 
-        target.searchParams.set("page", "dashboard");
-        target.searchParams.set("chat_message", cleanMessage);
+        target.searchParams.set('page', 'dashboard');
+        target.searchParams.set('chat_message', cleanMessage);
         target.searchParams.set(
-            "chat_nonce",
+            'chat_nonce',
             `${{Date.now()}}-${{Math.random().toString(16).slice(2)}}`
         );
 
@@ -756,44 +778,40 @@ if (__AURA_PAGE === "dashboard") {{
     }};
 
     function __auraRenderChatHistory() {{
-        const messages = document.getElementById("msgs");
+        const messages = document.getElementById('msgs');
 
         if (!messages) return;
 
-        messages.innerHTML = "";
+        messages.innerHTML = '';
 
-        if (
-            !Array.isArray(__AURA_CHAT_HISTORY) ||
-            __AURA_CHAT_HISTORY.length === 0
-        ) {{
-            return;
-        }}
+        if (!Array.isArray(__AURA_CHAT_HISTORY)) return;
 
         __AURA_CHAT_HISTORY.forEach((item) => {{
-            const row = document.createElement("div");
-            const isUser = item.role === "user";
+            const row = document.createElement('div');
+            const isUser = item.role === 'user';
 
-            row.className = isUser ? "m me" : "m";
+            row.className = isUser ? 'm me' : 'm';
 
             const avatar = document.createElement(
-                isUser ? "div" : "img"
+                isUser ? 'div' : 'img'
             );
 
             if (isUser) {{
-                avatar.className = "av";
+                avatar.className = 'av';
+
                 avatar.innerHTML =
                     '<svg viewBox="0 0 24 24">' +
                     '<circle cx="12" cy="8" r="4" fill="#fff" stroke="none"/>' +
                     '<path d="M4 21c0-4 4-6 8-6s8 2 8 6" fill="#fff" stroke="none"/>' +
-                    "</svg>";
+                    '</svg>';
             }} else {{
                 avatar.src = __AURA_AVATAR_URL;
-                avatar.alt = "Aura";
+                avatar.alt = 'Aura';
             }}
 
-            const bubble = document.createElement("div");
-            bubble.className = "bub";
-            bubble.textContent = item.content || "";
+            const bubble = document.createElement('div');
+            bubble.className = 'bub';
+            bubble.textContent = item.content || '';
 
             row.appendChild(avatar);
             row.appendChild(bubble);
@@ -831,14 +849,12 @@ html_path = (
     else INDEX_FILE
 )
 
-html_source = _read_text(html_path, html_path.name)
-avatar_url = _avatar_data_url()
+html_source = _read_text(
+    html_path,
+    html_path.name,
+)
 
-if page == "home":
-    st.caption(
-        "Session-based demo authentication. "
-        "Accounts reset when the app session ends."
-    )
+avatar_url = _avatar_data_url()
 
 if html_source and avatar_url:
     _inject_streamlit_layout_css()
@@ -856,8 +872,12 @@ if html_source and avatar_url:
     st.session_state["auth_feedback"] = None
     st.session_state["chat_error"] = None
 
+    # Fixed heights prevent the full HTML document from creating a large
+    # blank area inside the Streamlit page.
+    iframe_height = 820 if page == "home" else 900
+
     st.iframe(
         rendered_html,
         width="stretch",
-        height="content",
+        height=iframe_height,
     )
