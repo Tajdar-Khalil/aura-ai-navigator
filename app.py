@@ -13,7 +13,7 @@ from firebase_service import firebase_available, login_user, register_user, send
 from memory import ConversationMemory
 from rag import retrieve_context
 from security import sanitize_output, validate_user_input
-from services.profile_service import get_profile, mark_complete, save_recent_chat, set_goal
+from services.profile_service import get_profile, mark_complete, save_recent_chat, save_contact_message, set_goal
 from ui.styles import inject_styles
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -285,7 +285,10 @@ def render_contact() -> None:
             if not contact_name.strip() or not contact_email.strip() or not message.strip():
                 st.error("Please complete your name, email and message before sending.")
             else:
-                st.success("Message received. Thank you for contacting AuraAI.")
+                if save_contact_message(contact_name, contact_email, subject, message):
+                    st.success("Message received. Thank you for contacting AuraAI.")
+                else:
+                    st.error("The contact service is not configured yet. Please try again after Firebase/Firestore is configured.")
 
 
 def _safe_markdown(text: str) -> str:
