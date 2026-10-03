@@ -447,7 +447,7 @@ def render_left_sidebar() -> None:
 def render_right_sidebar() -> None:
     with st.container(key="dashboard-right"):
         # Aura card
-        aura_card_html = f
+        aura_card_html = f"""
         <div class="aura-card">
             <div class="aura-pic">
                 <img src="{aura_data_uri()}" alt="Aura AI">
@@ -459,7 +459,7 @@ def render_right_sidebar() -> None:
                 Smart guidance. Better decisions. A brighter future.
             </p>
         </div>
-        
+        """
 
         # unsafe_allow_html=True makes the HTML display normally.
         # Do not put ```html or ``` inside this string.
@@ -492,7 +492,7 @@ def render_right_sidebar() -> None:
         facts_html = '<div class="facts-card">'
 
         for icon, title, subtitle in facts:
-            facts_html += f
+            facts_html += f"""
             <div class="fact">
                 <div class="fact-icon">{icon}</div>
                 <div>
@@ -500,7 +500,7 @@ def render_right_sidebar() -> None:
                     <small>{subtitle}</small>
                 </div>
             </div>
-            
+            """
 
         facts_html += "</div>"
 
