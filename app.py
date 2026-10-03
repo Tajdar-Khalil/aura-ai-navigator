@@ -446,26 +446,15 @@ def render_left_sidebar() -> None:
 
 def render_right_sidebar() -> None:
     with st.container(key="dashboard-right"):
-        # Aura card
-        aura_card_html = f"""
-        <div class="aura-card">
-            <div class="aura-pic">
-                <img src="{aura_data_uri()}" alt="Aura AI">
-            </div>
+        # Aura profile card
+        with st.container(key="aura-profile-card"):
+            st.image(str(AVATAR), width=220)
 
-            <h2>Aura <span>AI</span></h2>
-            <p class="aura-role">Your Career Coach &amp; Guide</p>
-            <p class="muted">
-                Smart guidance. Better decisions. A brighter future.
-            </p>
-        </div>
-        """
+            st.subheader("Aura AI")
+            st.markdown("**Your Career Coach & Guide**")
+            st.caption("Smart guidance. Better decisions. A brighter future.")
 
-        # unsafe_allow_html=True makes the HTML display normally.
-        # Do not put ```html or ``` inside this string.
-        st.markdown(aura_card_html, unsafe_allow_html=True)
-
-        # Facts are defined and rendered only once.
+        # Facts section — defined and displayed only once
         facts = [
             (
                 "◉",
@@ -489,69 +478,51 @@ def render_right_sidebar() -> None:
             ),
         ]
 
-        facts_html = '<div class="facts-card">'
+        with st.container(key="aura-facts-card"):
+            for icon, title, subtitle in facts:
+                st.markdown(f"### {icon}  {title}")
+                st.caption(subtitle)
 
-        for icon, title, subtitle in facts:
-            facts_html += f"""
-            <div class="fact">
-                <div class="fact-icon">{icon}</div>
-                <div>
-                    <b>{title}</b>
-                    <small>{subtitle}</small>
-                </div>
-            </div>
-            """
+        # Keep the existing quick actions below this point
+        with st.container(key="aura-quick-actions"):
+            st.markdown("### ⚡ Quick Actions")
 
-        facts_html += "</div>"
+            actions = [
+                (
+                    "Generate Career Roadmap",
+                    "Generate my career roadmap",
+                    "roadmap",
+                ),
+                (
+                    "Analyze My Skills",
+                    "Analyze my skills",
+                    "skills",
+                ),
+                (
+                    "Explore Job Opportunities",
+                    "Explore job opportunities",
+                    "opportunities",
+                ),
+                (
+                    "Find Learning Resources",
+                    "Find free learning resources",
+                    "resources",
+                ),
+            ]
 
-        # Render the facts section once only.
-        st.markdown(facts_html, unsafe_allow_html=True)
-
-        # Quick actions
-        st.markdown(
-            '<div class="quick"><h4>⚡ Quick Actions</h4>',
-            unsafe_allow_html=True,
-        )
-
-        actions = [
-            (
-                "Generate Career Roadmap",
-                "Generate my career roadmap",
-                "roadmap",
-            ),
-            (
-                "Analyze My Skills",
-                "Analyze my skills",
-                "skills",
-            ),
-            (
-                "Explore Job Opportunities",
-                "Explore job opportunities",
-                "opportunities",
-            ),
-            (
-                "Find Learning Resources",
-                "Find free learning resources",
-                "resources",
-            ),
-        ]
-
-        for label, prompt, key in actions:
-            if st.button(
-                label + "  ›",
-                key=f"quick_{key}",
-                use_container_width=True,
-            ):
-                st.session_state.dashboard_page = "Chat with Aura"
-                _send_from_action(prompt, key)
-
-        st.markdown("</div>", unsafe_allow_html=True)
+            for label, prompt, key in actions:
+                if st.button(
+                    label + "  ›",
+                    key=f"quick_{key}",
+                    use_container_width=True,
+                ):
+                    st.session_state.dashboard_page = "Chat with Aura"
+                    _send_from_action(prompt, key)
 
         st.markdown(
-            '<div class="quote">✦ &nbsp; “Big dreams need a plan.<br>'
-            '&nbsp;&nbsp;&nbsp;&nbsp;I\'m here to help you build yours.”'
-            '<br><span style="float:right">— Aura</span></div>',
-            unsafe_allow_html=True,
+            "✦  **Big dreams need a plan.**  \n"
+            "I'm here to help you build yours.  \n"
+            "— Aura"
         )
 def render_profile_panel() -> None:
     profile = st.session_state.profile or get_profile(st.session_state.user)
