@@ -112,18 +112,21 @@ def auth_dialog():
         confirm = st.text_input("Confirm password", type="password") if mode == "register" else ""
         fcm_token = st.text_input("FCM token (optional)", type="password") if mode == "register" else ""
         submitted = st.form_submit_button("Create account" if mode == "register" else "Log in", type="primary", use_container_width=True)
+        forgot_submitted = (
+            st.form_submit_button("Forgot password?", type="secondary", use_container_width=False)
+            if mode == "login" else False
+        )
 
-    if mode == "login":
-        if st.button("Forgot password?", key="forgot_password", use_container_width=False):
-            try:
-                if not email.strip():
-                    st.error("Enter your email first.")
-                else:
-                    from firebase_service import send_password_reset
-                    send_password_reset(email.strip())
-                    st.success("If that account exists, Firebase has sent a password-reset email.")
-            except Exception as exc:
-                st.error(str(exc))
+    if forgot_submitted:
+        try:
+            if not email.strip():
+                st.error("Enter your email first.")
+            else:
+                from firebase_service import send_password_reset
+                send_password_reset(email.strip())
+                st.success("If that account exists, Firebase has sent a password-reset email.")
+        except Exception as exc:
+            st.error(str(exc))
 
     if submitted:
         try:
