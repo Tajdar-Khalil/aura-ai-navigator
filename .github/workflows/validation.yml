@@ -1,0 +1,28 @@
+name: AuraAI validation
+
+on:
+  push:
+    branches: ["main", "ui/**"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  python-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile Python sources
+        run: |
+          python -m compileall -q app.py agent.py firebase_service.py memory.py rag.py security.py services ui
+      - name: Validate required project files
+        run: |
+          test -f app.py
+          test -f requirements.txt
+          test -f system_prompt.txt
+          test -f knowledge_base.json
+          test -f data/knowledge_base.json
+          test -f assets/aura_avatar.jpg
+          test -f .streamlit/config.toml
