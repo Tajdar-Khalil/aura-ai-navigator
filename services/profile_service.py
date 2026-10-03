@@ -107,3 +107,22 @@ def save_recent_chat(user: dict[str, Any], title: str, prompt: str) -> dict[str,
         except Exception:
             pass
     return profile
+
+
+def save_contact_message(name: str, email: str, subject: str, message: str) -> bool:
+    """Persist a contact request when Firestore is configured."""
+    values = {
+        "name": name.strip()[:120],
+        "email": email.strip()[:254],
+        "subject": subject.strip()[:200],
+        "message": message.strip()[:5000],
+        "created_at": _now(),
+    }
+    db = _db()
+    if db is None:
+        return False
+    try:
+        db.collection("contact_messages").add(values)
+        return True
+    except Exception:
+        return False
