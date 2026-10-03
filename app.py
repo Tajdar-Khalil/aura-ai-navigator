@@ -13,7 +13,7 @@ from firebase_service import firebase_available, login_user, register_user, send
 from memory import ConversationMemory
 from rag import retrieve_context
 from security import sanitize_output, validate_user_input
-from services.profile_service import get_profile, mark_complete, save_recent_chat, set_goal
+from services.profile_service import get_profile, mark_complete, save_recent_chat, save_contact_message, set_goal
 from ui.styles import inject_styles
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -112,6 +112,21 @@ def auth_dialog():
         confirm = st.text_input("Confirm password", type="password") if mode == "register" else ""
         fcm_token = st.text_input("FCM token (optional)", type="password") if mode == "register" else ""
         submitted = st.form_submit_button("Create account" if mode == "register" else "Log in", type="primary", use_container_width=True)
+        forgot_submitted = (
+            st.form_submit_button("Forgot password?", type="secondary", use_container_width=False)
+            if mode == "login" else False
+        )
+
+    if forgot_submitted:
+        try:
+            if not email.strip():
+                st.error("Enter your email first.")
+            else:
+                from firebase_service import send_password_reset
+                send_password_reset(email.strip())
+                st.success("If that account exists, Firebase has sent a password-reset email.")
+        except Exception as exc:
+            st.error(str(exc))
 
     if submitted:
         try:
@@ -122,8 +137,8 @@ def auth_dialog():
                     raise ValueError("Full name is required.")
                 if password != confirm:
                     raise ValueError("Passwords do not match.")
-                if len(password) < 6:
-                    raise ValueError("Firebase requires a password of at least 6 characters.")
+                if len(password) < 8:
+                    raise ValueError("Use at least 8 characters for your password.")
                 result = register_user(name, email, password, fcm_token)
             else:
                 result = login_user(email, password)
@@ -270,7 +285,10 @@ def render_contact() -> None:
             if not contact_name.strip() or not contact_email.strip() or not message.strip():
                 st.error("Please complete your name, email and message before sending.")
             else:
-                st.success("Message received. Thank you for contacting AuraAI.")
+                if save_contact_message(contact_name, contact_email, subject, message):
+                    st.success("Message received. Thank you for contacting AuraAI.")
+                else:
+                    st.error("The contact service is not configured yet. Please try again after Firebase/Firestore is configured.")
 
 
 def _safe_markdown(text: str) -> str:
@@ -402,7 +420,6 @@ def render_left_sidebar() -> None:
             selected = st.session_state.dashboard_page == label.split("  ", 1)[-1]
             if st.button(label, key=f"side_{key}", use_container_width=True, type="primary" if selected else "secondary"):
                 st.session_state.dashboard_page = label.split("  ", 1)[-1]
-                st.session_state.profile = mark_complete(st.session_state.user, key)
                 st.rerun()
 
         progress = int(profile.get("progress", 0))
@@ -473,7 +490,8 @@ def render_dashboard_content() -> None:
     st.markdown(f'<div class="panel" style="height:100%;padding:28px"><h2>{html.escape(page)}</h2><p class="muted">This section is connected to Aura. Use the action below to send the request through the same RAG + CrewAI workflow.</p></div>', unsafe_allow_html=True)
     if st.button(f"Open {page} in Chat", key=f"open_{page}", type="primary"):
         st.session_state.dashboard_page = "Chat with Aura"
-        _send_from_action(prompts[page], page.lower().split()[0])
+        completion_key = {"Career Roadmap": "roadmap", "Skills": "skills", "Opportunities": "opportunities", "Resources": "resources"}[page]
+        _send_from_action(prompts[page], completion_key)
 
 
 def render_mobile_dashboard_nav() -> None:
@@ -498,8 +516,6 @@ def render_mobile_dashboard_nav() -> None:
                         type="primary" if st.session_state.dashboard_page == page else "secondary",
                     ):
                         st.session_state.dashboard_page = page
-                        if key != "profile":
-                            st.session_state.profile = mark_complete(st.session_state.user, key)
                         st.rerun()
 
             profile = st.session_state.profile or {}
