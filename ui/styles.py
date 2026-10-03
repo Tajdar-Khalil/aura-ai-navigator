@@ -837,5 +837,34 @@ img, video, iframe, svg, canvas {
   }
 }
 
+/* Aura profile card */
+.st-key-dashboard-right .aura-card {
+  padding: 18px !important;
+  display: block !important;
+  overflow: hidden !important;
+}
+
+.st-key-dashboard-right .aura-pic {
+  width: 220px !important;
+  height: 240px !important;
+  margin: 0 auto 4px !important;
+  position: relative !important;
+}
+
+.st-key-dashboard-right .aura-card h2 {
+  margin: -28px 0 0 !important;
+  font-size: 28px !important;
+  line-height: 1.15 !important;
+}
+
+.st-key-dashboard-right .aura-card .aura-role {
+  margin: 7px 0 2px !important;
+  color: var(--text) !important;
+  font-size: 13px !important;
+}
+
+.st-key-dashboard-right .aura-card .muted {
+  margin: 0 !important;
+}
 </style>
 """, unsafe_allow_html=True)
