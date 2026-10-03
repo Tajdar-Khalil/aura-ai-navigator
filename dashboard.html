@@ -203,55 +203,65 @@ aside.right{display:flex;flex-direction:column;gap:16px;overflow:auto;min-height
   </aside>
 </div>
 
-<script>
-const USER = 'Daniyal Riz';              // TODO: read from Firebase Auth (displayName)
-document.getElementById('uname').textContent = USER;
-document.querySelectorAll('.un').forEach(e => e.textContent = USER.split(' ')[0]);
-
-const msgs = document.getElementById('msgs'), box = document.getElementById('box');
-const time = () => new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
-const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-function add(role, html) {
-  const d = document.createElement('div');
-  d.className = 'm' + (role === 'me' ? ' me' : '');
-  d.innerHTML = (role === 'me'
-    ? '<div class="av"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="#fff" stroke="none"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6" fill="#fff" stroke="none"/></svg></div>'
-    : '<img src="aura_avatar.jpg" alt="Aura">') + '<div class="bub">' + html + '</div>';
-  msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight; return d;
-}
-
-// Placeholder replies: replace reply() with a call to your CrewAI/Groq backend
-function reply(q) {
-  const t = q.toLowerCase();
-  if (t.includes('roadmap') || t.includes('90')) return 'Here is a starting 90-day outline: <b>Days 1-30</b> web fundamentals and OWASP Top 10, <b>Days 31-60</b> Burp Suite and hands-on labs, <b>Days 61-90</b> a portfolio project and a bug bounty or CTF. Which free resources should I attach to each phase?';
-  if (t.includes('grc') || t.includes('compare')) return 'VAPT is hands-on and technical (testing and exploiting systems). GRC is policy, risk and compliance work. Do you prefer building and breaking things, or writing policy and auditing? That decides the better fit.';
-  if (t.includes('free') || t.includes('resource')) return 'Good free starting points: PortSwigger Web Security Academy, OWASP WebGoat and Juice Shop, TryHackMe free rooms. Want me to match them to your current level?';
-  if (t.includes('skill')) return 'To analyze your skills I need to know what you already have. Tell me your top three skills and your target role.';
-  if (t.includes('job') || t.includes('opportunit')) return 'I can look up current openings. Which role and location should I search for?';
-  return 'Thanks for sharing that. Tell me a bit more about your goal and current experience so I can tailor my advice.';
-}
-
-function send(q) {
-  q = q.trim(); if (!q) return;
-  add('me', esc(q) + '<time>' + time() + ' &#10003;&#10003;</time>');
-  const typing = add('aura', '<div class="typing"><i></i><i></i><i></i></div>');
-  setTimeout(() => {
-    typing.querySelector('.bub').innerHTML = '<p>' + reply(q) + '</p><time>' + time() + '</time>';
-    msgs.scrollTop = msgs.scrollHeight;
-  }, 900);
-}
-
-document.getElementById('form').addEventListener('submit', e => { e.preventDefault(); send(box.value); box.value = ''; });
-document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => send(c.textContent)));
-document.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => send(b.dataset.q)));
-
-// Sidebar: highlight selected item (pages for the other items come later)
-document.querySelectorAll('.menu button').forEach(b => b.addEventListener('click', () => {
-  document.querySelectorAll('.menu button').forEach(x => x.classList.remove('on'));
-  b.classList.add('on');
-}));
-msgs.scrollTop = 0;
-</script>
+ <script>
+-const USER = 'Daniyal Riz';              // TODO: read from Firebase Auth (displayName)
+-document.getElementById('uname').textContent = USER;
+-document.querySelectorAll('.un').forEach(e => e.textContent = USER.split(' ')[0]);
++const USER = 'Daniyal Riz';
++const userName = document.getElementById('uname');
++if (userName) userName.textContent = USER;
++document.querySelectorAll('.un').forEach(e => e.textContent = USER.split(' ')[0]);
+ 
+ const msgs = document.getElementById('msgs'), box = document.getElementById('box');
+ const time = () => new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+ const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+@@
+   msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight; return d;
+ }
+ 
+-// Placeholder replies: replace reply() with a call to your CrewAI/Groq backend
+-function reply(q) {
+-  const t = q.toLowerCase();
+-  if (t.includes('roadmap') || t.includes('90')) return 'Here is a starting 90-day outline: <b>Days 1-30</b> web fundamentals and OWASP Top 10, <b>Days 31-60</b> Burp Suite and hands-on labs, <b>[...]
+-  if (t.includes('grc') || t.includes('compare')) return 'VAPT is hands-on and technical (testing and exploiting systems). GRC is policy, risk and compliance work. Do you prefer building and breaking [...]
+-  if (t.includes('free') || t.includes('resource')) return 'Good free starting points: PortSwigger Web Security Academy, OWASP WebGoat and Juice Shop, TryHackMe free rooms. Want me to match them [...]
+-  if (t.includes('skill')) return 'To analyze your skills I need to know what you already have. Tell me your top three skills and your target role.';
+-  if (t.includes('job') || t.includes('opportunit')) return 'I can look up current openings. Which role and location should I search for?';
+-  return 'Thanks for sharing that. Tell me a bit more about your goal and current experience so I can tailor my advice.';
+-}
+-
+ function send(q) {
+   q = q.trim(); if (!q) return;
+   add('me', esc(q) + '<time>' + time() + ' &#10003;&#10003;</time>');
+-  const typing = add('aura', '<div class="typing"><i></i><i></i><i></i></div>');
+-  setTimeout(() => {
+-    typing.querySelector('.bub').innerHTML = '<p>' + reply(q) + '</p><time>' + time() + '</time>';
+-    msgs.scrollTop = msgs.scrollHeight;
+-  }, 900);
++
++  // The Streamlit-injected bridge sends this message to app.py.
++  // app.py runs RAG + CrewAI, stores the result in session state,
++  // reruns Streamlit, and injects the assistant response back here.
++  if (typeof window.__auraSubmitChat === 'function') {
++    window.__auraSubmitChat(q);
++  } else {
++    add(
++      'aura',
++      '<p>Chat is still connecting to the Aura backend. Please try again.</p><time>' +
++      time() +
++      '</time>'
++    );
++  }
+ }
+ 
+ document.getElementById('form').addEventListener('submit', e => { e.preventDefault(); send(box.value); box.value = ''; });
+ document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => send(c.textContent)));
+ document.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => send(b.dataset.q)));
+@@
+   b.classList.add('on');
+ }));
+-msgs.scrollTop = 0;
++msgs.scrollTop = msgs.scrollHeight;
+ </script>
 </body>
 </html>
