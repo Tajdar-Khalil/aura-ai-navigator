@@ -446,54 +446,113 @@ def render_left_sidebar() -> None:
 
 def render_right_sidebar() -> None:
     with st.container(key="dashboard-right"):
-        st.markdown(
-            f"""
-            <div class="aura-card">
-                <div class="aura-pic">
-                    <img src="{aura_data_uri()}" alt="Aura AI">
-                </div>
-
-                <h2>Aura <span>AI</span></h2>
-                <p class="aura-role">Your Career Coach &amp; Guide</p>
-                <p class="muted">
-                    Smart guidance. Better decisions. A brighter future.
-                </p>
+        # Aura card
+        aura_card_html = f"""
+        <div class="aura-card">
+            <div class="aura-pic">
+                <img src="{aura_data_uri()}" alt="Aura AI">
             </div>
-            """,
+
+            <h2>Aura <span>AI</span></h2>
+            <p class="aura-role">Your Career Coach &amp; Guide</p>
+            <p class="muted">
+                Smart guidance. Better decisions. A brighter future.
+            </p>
+        </div>
+        """
+
+        # unsafe_allow_html=True makes the HTML display normally.
+        # Do not put ```html or ``` inside this string.
+        st.markdown(aura_card_html, unsafe_allow_html=True)
+
+        # Facts are defined and rendered only once.
+        facts = [
+            (
+                "◉",
+                "Powered by GPT-OSS-120B",
+                "Advanced reasoning & analysis",
+            ),
+            (
+                "▣",
+                "RAG Knowledge Base",
+                "Curated career resources",
+            ),
+            (
+                "♣",
+                "4 External Tools",
+                "Search · Wikipedia · API · Calculator",
+            ),
+            (
+                "◌",
+                "Human-in-the-Loop",
+                "For important decisions & preferences",
+            ),
+        ]
+
+        facts_html = '<div class="facts-card">'
+
+        for icon, title, subtitle in facts:
+            facts_html += f"""
+            <div class="fact">
+                <div class="fact-icon">{icon}</div>
+                <div>
+                    <b>{title}</b>
+                    <small>{subtitle}</small>
+                </div>
+            </div>
+            """
+
+        facts_html += "</div>"
+
+        # Render the facts section once only.
+        st.markdown(facts_html, unsafe_allow_html=True)
+
+        # Quick actions
+        st.markdown(
+            '<div class="quick"><h4>⚡ Quick Actions</h4>',
             unsafe_allow_html=True,
         )
 
-        st.markdown('<div class="facts-card">', unsafe_allow_html=True)
-        facts = [
-            ("◉", "Powered by GPT-OSS-120B", "Advanced reasoning & analysis"),
-            ("▣", "RAG Knowledge Base", "Curated career resources"),
-            ("♣", "4 External Tools", "Search · Wikipedia · API · Calculator"),
-            ("◌", "Human-in-the-Loop", "For important decisions & preferences"),
+        actions = [
+            (
+                "Generate Career Roadmap",
+                "Generate my career roadmap",
+                "roadmap",
+            ),
+            (
+                "Analyze My Skills",
+                "Analyze my skills",
+                "skills",
+            ),
+            (
+                "Explore Job Opportunities",
+                "Explore job opportunities",
+                "opportunities",
+            ),
+            (
+                "Find Learning Resources",
+                "Find free learning resources",
+                "resources",
+            ),
         ]
 
-        for icon, title, sub in facts:
-            st.markdown(
-                f'<div class="fact">'
-                f'<div class="fact-icon">{icon}</div>'
-                f'<div><b>{title}</b><small>{sub}</small></div>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
-
-        st.markdown("</div>", unsafe_allow_html=True)
-        facts = [("◉", "Powered by GPT-OSS-120B", "Advanced reasoning & analysis"), ("▣", "RAG Knowledge Base", "Curated career resources"), ("♣", "4 External Tools", "Search · Wikipedia · API · Calculator"), ("◌", "Human-in-the-Loop", "For important decisions & preferences")]
-        for icon, title, sub in facts:
-            st.markdown(f'<div class="fact"><div class="fact-icon">{icon}</div><div><b>{title}</b><small>{sub}</small></div></div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('<div class="quick"><h4>⚡ Quick Actions</h4>', unsafe_allow_html=True)
-        actions = [("Generate Career Roadmap", "Generate my career roadmap", "roadmap"), ("Analyze My Skills", "Analyze my skills", "skills"), ("Explore Job Opportunities", "Explore job opportunities", "opportunities"), ("Find Learning Resources", "Find free learning resources", "resources")]
         for label, prompt, key in actions:
-            if st.button(label + "  ›", key=f"quick_{key}", use_container_width=True):
+            if st.button(
+                label + "  ›",
+                key=f"quick_{key}",
+                use_container_width=True,
+            ):
                 st.session_state.dashboard_page = "Chat with Aura"
                 _send_from_action(prompt, key)
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown("<div class=\"quote\">✦ &nbsp; “Big dreams need a plan.<br>&nbsp;&nbsp;&nbsp;&nbsp;I'm here to help you build yours.”<br><span style=\"float:right\">— Aura</span></div>", unsafe_allow_html=True)
 
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown(
+            '<div class="quote">✦ &nbsp; “Big dreams need a plan.<br>'
+            '&nbsp;&nbsp;&nbsp;&nbsp;I\'m here to help you build yours.”'
+            '<br><span style="float:right">— Aura</span></div>',
+            unsafe_allow_html=True,
+        )
 def render_profile_panel() -> None:
     profile = st.session_state.profile or get_profile(st.session_state.user)
     progress = int(profile.get("progress", 0))
