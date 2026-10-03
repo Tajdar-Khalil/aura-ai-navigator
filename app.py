@@ -446,25 +446,41 @@ def render_left_sidebar() -> None:
 
 def render_right_sidebar() -> None:
     with st.container(key="dashboard-right"):
-       st.markdown(
-    f"""
-    <div class="aura-card">
-        <div class="aura-pic">
-            <img src="{aura_data_uri()}" alt="Aura AI">
-        </div>
+        st.markdown(
+            f"""
+            <div class="aura-card">
+                <div class="aura-pic">
+                    <img src="{aura_data_uri()}" alt="Aura AI">
+                </div>
 
-        <h2>Aura <span>AI</span></h2>
+                <h2>Aura <span>AI</span></h2>
+                <p class="aura-role">Your Career Coach &amp; Guide</p>
+                <p class="muted">
+                    Smart guidance. Better decisions. A brighter future.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-        <p class="aura-role">Your Career Coach &amp; Guide</p>
-
-        <p class="muted">
-            Smart guidance. Better decisions. A brighter future.
-        </p>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
         st.markdown('<div class="facts-card">', unsafe_allow_html=True)
+        facts = [
+            ("◉", "Powered by GPT-OSS-120B", "Advanced reasoning & analysis"),
+            ("▣", "RAG Knowledge Base", "Curated career resources"),
+            ("♣", "4 External Tools", "Search · Wikipedia · API · Calculator"),
+            ("◌", "Human-in-the-Loop", "For important decisions & preferences"),
+        ]
+
+        for icon, title, sub in facts:
+            st.markdown(
+                f'<div class="fact">'
+                f'<div class="fact-icon">{icon}</div>'
+                f'<div><b>{title}</b><small>{sub}</small></div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("</div>", unsafe_allow_html=True)
         facts = [("◉", "Powered by GPT-OSS-120B", "Advanced reasoning & analysis"), ("▣", "RAG Knowledge Base", "Curated career resources"), ("♣", "4 External Tools", "Search · Wikipedia · API · Calculator"), ("◌", "Human-in-the-Loop", "For important decisions & preferences")]
         for icon, title, sub in facts:
             st.markdown(f'<div class="fact"><div class="fact-icon">{icon}</div><div><b>{title}</b><small>{sub}</small></div></div>', unsafe_allow_html=True)
