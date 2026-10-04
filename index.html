@@ -2,450 +2,928 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AuraAI | AI Career &amp; Skills Navigator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AuraAI | AI Career & Skills Navigator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg-0:#030a1f; --bg-1:#061a45; --bg-2:#0a2a6b;
-  --panel:rgba(12,34,84,.55); --panel-solid:#0b2253;
-  --line:rgba(77,140,255,.28);
-  --blue:#1f8bff; --blue-d:#1468d6; --cyan:#22e0c0; --violet:#b07cff;
-  --text:#f2f6ff; --muted:#9db4dd;
+  --bg-0:#020718; --bg-1:#061435; --bg-2:#0a2254;
+  --panel:rgba(10,28,70,0.62); --panel-solid:#081d47;
+  --line:rgba(77,140,255,0.22); --line-bright:rgba(77,140,255,0.45);
+  --blue:#1f8bff; --blue-d:#1468d6; --cyan:#22e0c0; --violet:#9b72ff;
+  --text:#f2f6ff; --muted:#94abcf;
   --font:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --header-h:68px;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;scroll-padding-top:84px}
-body{font-family:var(--font);color:var(--text);background:var(--bg-0);line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
-body::before{content:"";position:fixed;inset:0;z-index:-1;
-  background:
-   radial-gradient(900px 500px at 85% 12%,rgba(31,139,255,.28),transparent 60%),
-   radial-gradient(700px 500px at 5% 0%,rgba(20,104,214,.25),transparent 60%),
-   linear-gradient(160deg,var(--bg-0) 0%,var(--bg-1) 55%,#08235a 100%)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:var(--font);color:var(--text);background:var(--bg-0);line-height:1.55}
+body{display:flex;flex-direction:column;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:10px}
+button,input,textarea{font-family:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:10px}
+
+/* Background Atmosphere */
+.ambient-bg{
+  position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(850px 480px at 85% 10%,rgba(31,139,255,0.22),transparent 60%),
+    radial-gradient(750px 450px at 10% 0%,rgba(20,104,214,0.2),transparent 60%),
+    linear-gradient(165deg,var(--bg-0) 0%,var(--bg-1) 50%,#05183d 100%);
+}
+
 .wrap{width:min(1180px,92%);margin-inline:auto}
+.view{display:none;width:100%;flex:1;flex-direction:column}
+.view.active{display:flex}
 
-/* Header */
-header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(3,10,31,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-.bar{display:flex;align-items:center;justify-content:space-between;height:72px;gap:16px}
-.brand{display:flex;align-items:center;gap:12px}
-.brand svg{width:34px;height:34px;filter:drop-shadow(0 0 10px rgba(31,139,255,.8))}
-.brand b{font-size:1.65rem;font-weight:800;letter-spacing:-.02em}
+/* ========================================================
+   LANDING PAGE VIEW
+======================================================== */
+#viewLanding header{
+  position:sticky;top:0;z-index:30;
+  background:rgba(2,7,24,0.78);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.landing-bar{display:flex;align-items:center;justify-content:space-between;height:var(--header-h);gap:14px}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+.brand svg{width:32px;height:32px;fill:var(--blue);filter:drop-shadow(0 0 10px rgba(31,139,255,0.75))}
+.brand b{font-size:1.55rem;font-weight:800;letter-spacing:-0.02em}
 .brand b span{color:var(--blue)}
-.brand i{font-style:normal;color:var(--muted);font-size:.92rem;padding-left:14px;border-left:1px solid var(--line)}
-header nav{display:flex;align-items:center;gap:6px}
-nav a.link{padding:10px 20px;border-radius:12px;font-weight:600;font-size:.95rem;color:#d6e3ff;transition:background .2s,color .2s}
-nav a.link:hover{background:rgba(31,139,255,.16)}
-nav a.link.active{background:linear-gradient(180deg,#1f8bff,#1468d6);color:#fff;box-shadow:0 6px 20px rgba(31,139,255,.35)}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:12px;font:600 .95rem var(--font);cursor:pointer;border:1px solid var(--line);color:var(--text);background:transparent;transition:transform .15s,box-shadow .2s,background .2s}
-.btn:hover{background:rgba(31,139,255,.14)}
+.brand i{font-style:normal;color:var(--muted);font-size:0.88rem;padding-left:14px;border-left:1px solid var(--line)}
+
+nav.landing-nav{display:flex;align-items:center;gap:6px}
+nav.landing-nav a.link{padding:8px 18px;border-radius:12px;font-weight:600;font-size:0.92rem;color:#d6e3ff;transition:background 0.2s}
+nav.landing-nav a.link:hover{background:rgba(31,139,255,0.15)}
+nav.landing-nav a.link.active{background:linear-gradient(180deg,#1f8bff,#1468d6);color:#fff}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:12px;
+  font-weight:600;font-size:0.94rem;cursor:pointer;border:1px solid var(--line);
+  background:rgba(31,139,255,0.06);color:var(--text);transition:all 0.2s;
+}
+.btn:hover{background:rgba(31,139,255,0.18);border-color:var(--line-bright)}
 .btn:active{transform:translateY(1px)}
-.btn.primary{background:linear-gradient(180deg,#2b97ff,#1468d6);border-color:transparent;box-shadow:0 8px 24px rgba(31,139,255,.4)}
-.btn.primary:hover{box-shadow:0 10px 30px rgba(31,139,255,.6)}
-.btn.lg{padding:15px 30px;font-size:1.02rem}
-.nav-actions{display:flex;gap:10px;margin-left:10px}
-.menu{display:none!important;background:none;border:1px solid var(--line);color:var(--text);border-radius:10px;width:42px;height:42px;font-size:1.3rem;cursor:pointer}
+.btn.primary{
+  background:linear-gradient(180deg,#258eff,#1468d6);border-color:transparent;
+  box-shadow:0 8px 24px rgba(31,139,255,0.4);
+}
+.btn.primary:hover{box-shadow:0 10px 30px rgba(31,139,255,0.65)}
+.btn.lg{padding:14px 28px;font-size:1.02rem}
 
-/* Hero */
-.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;padding:70px 0 40px}
-.badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border:1px solid var(--line);border-radius:999px;color:#7db8ff;font-weight:600;font-size:.9rem;background:rgba(31,139,255,.08)}
-h1{font-size:clamp(2.6rem,6vw,4.6rem);line-height:1.04;font-weight:800;letter-spacing:-.035em;margin:26px 0 22px}
-h1 em{font-style:normal;background:linear-gradient(90deg,#3aa0ff,#b07cff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.lead{color:var(--muted);font-size:1.12rem;max-width:560px;margin-bottom:34px}
-.portrait{position:relative;justify-self:center;width:min(400px,80vw);aspect-ratio:1}
-.portrait::before{content:"";position:absolute;inset:-18px;border-radius:50%;border:2px solid rgba(31,139,255,.65);box-shadow:0 0 50px rgba(31,139,255,.35),inset 0 0 40px rgba(31,139,255,.15)}
-.portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 20%;border-radius:50%;border:3px solid rgba(80,160,255,.8);display:block}
-.hello{position:absolute;right:-30px;bottom:-40px;background:var(--panel-solid);border:1px solid var(--line);border-radius:18px;padding:16px 22px;box-shadow:0 18px 40px rgba(0,0,0,.45),0 0 30px rgba(31,139,255,.2)}
-.hello strong{display:flex;align-items:center;gap:8px;font-size:1.08rem}
-.hello strong svg{width:18px;height:18px}
-.hello span{color:var(--muted);font-size:.92rem}
-.dot{width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.hero{display:grid;grid-template-columns:1.2fr 0.8fr;gap:40px;align-items:center;padding:60px 0 40px}
+.badge{
+  display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border:1px solid var(--line);
+  border-radius:999px;color:#8cc0ff;font-weight:600;font-size:0.86rem;background:rgba(31,139,255,0.08);
+}
+.hero h1{font-size:clamp(2.4rem,5vw,4.2rem);line-height:1.08;font-weight:800;letter-spacing:-0.03em;margin:22px 0 18px}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,#3ba3ff,#9b72ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--muted);font-size:1.1rem;max-width:540px;margin-bottom:30px}
 
-/* Features */
-.features{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;padding:30px 0 80px}
-.feat{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;transition:border-color .2s,transform .2s}
-.feat:hover{border-color:rgba(77,160,255,.6);transform:translateY(-3px)}
-.ico{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;margin-bottom:16px;background:linear-gradient(145deg,#12388a,#0b2253);border:1px solid var(--line);color:#4aa8ff}
-.ico svg{width:24px;height:24px}
-.feat h3{font-size:1.05rem;margin-bottom:6px}
-.feat p{color:var(--muted);font-size:.92rem}
+.portrait{position:relative;justify-self:center;width:min(340px,76vw);aspect-ratio:1}
+.portrait-ring{
+  position:absolute;inset:-14px;border-radius:50%;
+  border:2px solid rgba(31,139,255,0.65);
+  box-shadow:0 0 40px rgba(31,139,255,0.35),inset 0 0 30px rgba(31,139,255,0.2);
+}
+.avatar-circle{
+  width:100%;height:100%;border-radius:50%;object-fit:cover;
+  border:3px solid rgba(80,160,255,0.8);display:grid;place-items:center;
+  background:linear-gradient(145deg,#0d2f7a,#071a47);
+}
+.avatar-circle svg{width:50%;height:50%;fill:var(--blue)}
+.hello-pill{
+  position:absolute;right:-18px;bottom:-20px;background:var(--panel-solid);
+  border:1px solid var(--line-bright);border-radius:16px;padding:12px 18px;
+  box-shadow:0 18px 40px rgba(0,0,0,0.5),0 0 25px rgba(31,139,255,0.25);
+}
+.hello-pill strong{display:flex;align-items:center;gap:8px;font-size:1rem}
+.hello-pill strong svg{width:16px;height:16px;fill:var(--cyan)}
+.hello-pill span{color:var(--muted);font-size:0.84rem;display:block;margin-top:2px}
 
-/* Sections */
-section.block{padding:80px 0;border-top:1px solid var(--line)}
-section.block h2{font-size:clamp(1.8rem,3.4vw,2.5rem);letter-spacing:-.025em;margin-bottom:14px}
-.sub{color:var(--muted);max-width:640px;margin-bottom:34px}
-.about-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px}
-.card h3{margin-bottom:8px;font-size:1.05rem;color:#7db8ff}
-.card p{color:var(--muted);font-size:.95rem}
-.contact-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:34px;align-items:start}
-.info{display:grid;gap:14px}
-.info div{display:flex;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
-.info svg{width:22px;height:22px;color:#4aa8ff;flex:none}
-form{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px;display:grid;gap:14px}
-label{font-weight:600;font-size:.9rem;display:grid;gap:6px}
-input,textarea{font:400 .95rem var(--font);color:var(--text);background:rgba(3,10,31,.6);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%}
-input::placeholder,textarea::placeholder{color:#6f87b5}
-input:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(31,139,255,.25)}
-textarea{min-height:120px;resize:vertical}
-.ok{display:none;color:var(--cyan);font-weight:600}
+.features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:30px 0 60px}
+.feat{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;transition:all 0.25s}
+.feat:hover{border-color:var(--line-bright);transform:translateY(-3px)}
+.ico-wrap{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;margin-bottom:14px;background:linear-gradient(145deg,#12388a,#0b2253);border:1px solid var(--line);color:#4aa8ff}
+.ico-wrap svg{width:22px;height:22px;stroke:currentColor;stroke-width:2;fill:none}
+.feat h3{font-size:1.02rem;margin-bottom:6px}
+.feat p{color:var(--muted);font-size:0.88rem}
 
-/* Auth modal */
-.overlay{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,6,20,.72);backdrop-filter:blur(8px)}
-.overlay.show{display:flex;animation:fade .2s ease}
-.modal{position:relative;width:min(440px,100%);max-height:94vh;overflow:auto;background:linear-gradient(170deg,#0d2a66,#071a45);border:1px solid var(--line);border-radius:22px;padding:30px 28px 26px;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(31,139,255,.22);animation:pop .22s ease}
-@keyframes fade{from{opacity:0}to{opacity:1}}
-@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
-.x{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:1.2rem;cursor:pointer}
-.x:hover{color:var(--text);background:rgba(31,139,255,.14)}
-.m-head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.m-head img{width:48px;height:48px;border-radius:50%;object-fit:cover;object-position:50% 20%;border:2px solid rgba(80,160,255,.8)}
-.m-head h2{font-size:1.35rem;letter-spacing:-.02em;line-height:1.2}
-.m-head p{color:var(--muted);font-size:.88rem}
-.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border:1px solid var(--line);border-radius:14px;background:rgba(3,10,31,.5);margin-bottom:20px}
-.seg button{padding:10px;border:0;border-radius:10px;background:transparent;color:var(--muted);font:600 .92rem var(--font);cursor:pointer}
-.seg button.on{background:linear-gradient(180deg,#2b97ff,#1468d6);color:#fff;box-shadow:0 6px 18px rgba(31,139,255,.35)}
-.pane{display:none;gap:14px}
-.pane.on{display:grid}
-.field{position:relative}
-.field .eye{position:absolute;right:8px;top:33px;border:0;background:none;color:var(--muted);cursor:pointer;font-size:.8rem;font-weight:600;padding:6px 8px;border-radius:8px}
-.field .eye:hover{color:var(--text)}
-.field input.bad{border-color:#ff6b7a;box-shadow:0 0 0 3px rgba(255,107,122,.18)}
-.err{color:#ff8d99;font-size:.82rem;font-weight:500;min-height:0}
-.row{display:flex;justify-content:space-between;align-items:center;font-size:.88rem;color:var(--muted)}
-.row a,.swap{color:#6db4ff;font-weight:600;background:none;border:0;cursor:pointer;font:inherit;font-weight:600}
-.row a:hover,.swap:hover{text-decoration:underline}
-.m-foot{text-align:center;color:var(--muted);font-size:.9rem;margin-top:16px}
-.notice{display:none;text-align:center;padding:26px 6px 8px}
-.notice.show{display:block}
-.notice .tick{width:60px;height:60px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;background:rgba(34,224,192,.12);border:1px solid var(--cyan);color:var(--cyan);font-size:1.6rem}
-.notice h3{font-size:1.25rem;margin-bottom:6px}
-.notice p{color:var(--muted);margin-bottom:20px}
+.mobile-menu-btn{display:none;background:none;border:1px solid var(--line);color:var(--text);border-radius:10px;width:40px;height:40px;font-size:1.25rem;cursor:pointer}
 
-/* Footer */
-footer{margin-top:auto;border-top:1px solid var(--line);background:rgba(3,10,31,.7);padding:28px 0}
-.foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;color:var(--muted);font-size:.9rem}
-.foot nav a{padding:6px 12px;color:var(--muted)}
-.foot nav a:hover{color:var(--text)}
+/* ========================================================
+   AUTH MODAL (POPUP SYSTEM)
+======================================================== */
+.modal-overlay{
+  position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;
+  padding:16px;background:rgba(2,6,20,0.76);backdrop-filter:blur(10px);
+}
+.modal-overlay.show{display:flex}
+.modal-card{
+  position:relative;width:min(440px,100%);max-height:92vh;overflow-y:auto;
+  background:linear-gradient(170deg,#0a245c,#06173a);
+  border:1px solid var(--line-bright);border-radius:24px;padding:28px 24px;
+  box-shadow:0 30px 80px rgba(0,0,0,0.7),0 0 50px rgba(31,139,255,0.25);
+}
+.modal-close{
+  position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:10px;
+  border:1px solid var(--line);background:rgba(255,255,255,0.03);color:var(--muted);
+  cursor:pointer;display:grid;place-items:center;font-size:1.2rem;
+}
+.modal-close:hover{color:var(--text);background:rgba(31,139,255,0.18)}
+.m-head{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.m-head .m-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#1f8bff,#12439c);display:grid;place-items:center;border:2px solid rgba(80,160,255,0.8)}
+.m-head .m-avatar svg{width:24px;height:24px;fill:#fff}
+.m-head h2{font-size:1.3rem;letter-spacing:-0.02em}
+.m-head p{color:var(--muted);font-size:0.86rem}
 
-@media(max-width:960px){
-  .hero{grid-template-columns:1fr;padding-top:44px}
-  .portrait{margin:20px 0 50px}
-  .hello{right:0}
-  .features{grid-template-columns:repeat(2,1fr)}
-  .about-grid,.contact-grid{grid-template-columns:1fr}
+.seg-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border:1px solid var(--line);border-radius:14px;background:rgba(2,7,24,0.6);margin-bottom:20px}
+.seg-tabs button{padding:9px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-weight:600;font-size:0.9rem;cursor:pointer}
+.seg-tabs button.active{background:linear-gradient(180deg,#258eff,#1468d6);color:#fff;box-shadow:0 6px 18px rgba(31,139,255,0.35)}
+
+.auth-pane{display:none;flex-direction:column;gap:14px}
+.auth-pane.active{display:flex}
+.form-field{display:flex;flex-direction:column;gap:6px;position:relative}
+.form-field label{font-size:0.88rem;font-weight:600;color:#cddcfa}
+.form-field input{
+  background:rgba(3,10,31,0.65);border:1px solid var(--line);border-radius:12px;
+  padding:12px 14px;color:var(--text);font-size:0.95rem;transition:border-color 0.2s;
+}
+.form-field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(31,139,255,0.22)}
+.form-field input.bad{border-color:#ff5e6e;box-shadow:0 0 0 3px rgba(255,94,110,0.18)}
+.pwd-toggle{position:absolute;right:10px;top:33px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.8rem;padding:4px 6px}
+.err-msg{color:#ff8591;font-size:0.8rem;font-weight:500;min-height:16px}
+
+/* ========================================================
+   DASHBOARD VIEW & HEADER
+======================================================== */
+#viewDashboard{height:100vh;overflow:hidden}
+.dash-header{
+  height:var(--header-h);flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;border-bottom:1px solid var(--line);
+  background:rgba(2,7,24,0.85);backdrop-filter:blur(14px);z-index:40;
+}
+.dash-left{display:flex;align-items:center;gap:14px}
+.dash-actions{display:flex;align-items:center;gap:14px;position:relative}
+
+/* Bell notification */
+.bell-btn{
+  position:relative;width:40px;height:40px;border-radius:12px;
+  background:rgba(31,139,255,0.08);border:1px solid var(--line);
+  color:#cce0ff;display:grid;place-items:center;cursor:pointer;
+}
+.bell-btn:hover{background:rgba(31,139,255,0.18);border-color:var(--line-bright)}
+.bell-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2}
+.bell-badge{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:#ff4d5e;box-shadow:0 0 8px #ff4d5e}
+
+/* Profile Pill */
+.user-pill{
+  display:inline-flex;align-items:center;gap:10px;
+  background:rgba(12,32,77,0.7);border:1px solid var(--line-bright);
+  border-radius:999px;padding:4px 14px 4px 6px;cursor:pointer;
+  transition:all 0.2s;user-select:none;
+}
+.user-pill:hover,.user-pill.open{background:rgba(31,139,255,0.2);box-shadow:0 0 16px rgba(31,139,255,0.25)}
+.user-avatar{
+  width:32px;height:32px;border-radius:50%;background:linear-gradient(145deg,#2b97ff,#1468d6);
+  display:grid;place-items:center;overflow:hidden;flex:none;border:1px solid rgba(255,255,255,0.2);
+}
+.user-avatar svg{width:18px;height:18px;fill:#fff}
+.user-name{font-weight:600;font-size:0.88rem;color:#e8f1ff;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pill-arrow{width:14px;height:14px;fill:none;stroke:var(--muted);stroke-width:2.2;transition:transform 0.2s}
+.user-pill.open .pill-arrow{transform:rotate(180deg)}
+
+/* Dropdown Menu */
+.user-dropdown{
+  position:absolute;top:calc(100% + 10px);right:0;width:260px;
+  background:linear-gradient(175deg,#0a2254,#06173a);
+  border:1px solid var(--line-bright);border-radius:18px;padding:12px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.65),0 0 30px rgba(31,139,255,0.2);
+  display:none;flex-direction:column;gap:8px;z-index:60;
+  animation:popDown 0.18s ease forwards;
+}
+.user-dropdown.show{display:flex}
+@keyframes popDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+.dropdown-user-info{display:flex;gap:12px;align-items:center;padding:8px 6px 12px;border-bottom:1px solid var(--line)}
+.d-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#2b97ff,#1468d6);display:grid;place-items:center;flex:none}
+.d-meta{overflow:hidden}
+.d-meta b{display:block;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d-meta small{color:var(--muted);font-size:0.75rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d-status{display:inline-flex;align-items:center;gap:5px;font-size:0.7rem;color:var(--cyan);margin-top:2px}
+.d-status i{width:6px;height:6px;border-radius:50%;background:var(--cyan);display:inline-block}
+
+.dropdown-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+  font-size:0.88rem;color:#d5e5ff;cursor:pointer;border:none;background:none;width:100%;text-align:left;
+  transition:background 0.18s;
+}
+.dropdown-item:hover{background:rgba(31,139,255,0.15);color:#fff}
+.dropdown-item svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.dropdown-item.logout{color:#ff7d8a}
+.dropdown-item.logout:hover{background:rgba(255,94,110,0.12);color:#ff9fa8}
+
+/* Dashboard Body App */
+.dash-app{
+  flex:1;min-height:0;display:grid;
+  grid-template-columns:260px 1fr 320px;gap:16px;padding:16px;
+}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;min-height:0;overflow:hidden}
+
+/* Left Sidebar */
+aside.dash-left-bar{display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.dash-menu{display:flex;flex-direction:column;gap:4px;padding:12px}
+.dash-menu button{
+  display:flex;align-items:center;gap:12px;padding:11px 14px;border:0;border-radius:12px;
+  background:none;color:#cfdfff;font-size:0.92rem;font-weight:500;cursor:pointer;text-align:left;
+  transition:all 0.18s;
+}
+.dash-menu button svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;flex:none}
+.dash-menu button:hover{background:rgba(31,139,255,0.14)}
+.dash-menu button.active{
+  background:linear-gradient(180deg,#1f8bff,#1468d6);color:#fff;font-weight:600;
+  box-shadow:0 6px 18px rgba(31,139,255,0.35);
+}
+
+.prog-box{padding:16px}
+.prog-box h4{font-size:0.88rem;font-weight:600;margin-bottom:12px;color:#c9dcff}
+.prog-flex{display:flex;align-items:center;gap:12px}
+.ring-prog{
+  width:56px;height:56px;border-radius:50%;flex:none;
+  background:conic-gradient(var(--blue) 68%,rgba(255,255,255,0.1) 0);
+  display:grid;place-items:center;
+}
+.ring-prog span{width:44px;height:44px;border-radius:50%;background:#081b45;display:grid;place-items:center;font-weight:700;font-size:0.86rem}
+.prog-text b{display:block;font-size:0.88rem}
+.prog-text small{color:var(--muted);font-size:0.75rem}
+
+.recent-box{padding:14px;flex:1;overflow-y:auto}
+.recent-box h4{font-size:0.86rem;color:#b2cdfa;margin-bottom:8px}
+.chat-tab{
+  display:flex;align-items:center;gap:10px;width:100%;padding:10px 8px;border:none;
+  border-bottom:1px solid rgba(77,140,255,0.12);background:none;color:inherit;
+  cursor:pointer;text-align:left;border-radius:8px;
+}
+.chat-tab:hover{background:rgba(31,139,255,0.1)}
+.chat-tab .ct-ic{width:28px;height:28px;border-radius:8px;background:rgba(31,139,255,0.18);display:grid;place-items:center;color:#6db2ff;flex:none}
+.chat-tab .ct-ic svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
+.chat-tab b{font-size:0.8rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-tab small{font-size:0.7rem;color:var(--muted)}
+
+/* Main Workspace */
+main.dash-main{display:flex;flex-direction:column;overflow:hidden}
+.chat-head{
+  display:flex;justify-content:space-between;align-items:center;padding:14px 20px;
+  border-bottom:1px solid var(--line);background:rgba(2,7,24,0.4);
+}
+.chat-head-left{display:flex;align-items:center;gap:12px}
+.chat-head-left svg{width:24px;height:24px;fill:var(--blue)}
+.chat-head-left h2{font-size:1.05rem;line-height:1.2}
+.chat-head-left p{font-size:0.8rem;color:var(--muted)}
+.online-pill{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid rgba(34,224,192,0.4);
+  border-radius:999px;color:var(--cyan);font-size:0.78rem;background:rgba(34,224,192,0.06);
+}
+.online-pill i{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+
+/* Messages Scroll */
+.chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
+.msg{display:flex;gap:12px;max-width:88%}
+.msg.me{align-self:flex-end;flex-direction:row-reverse}
+.msg-av{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;background:linear-gradient(135deg,#2b97ff,#1468d6);border:2px solid rgba(80,160,255,0.7)}
+.msg-av svg{width:20px;height:20px;fill:#fff}
+.msg-bubble{padding:13px 16px;border-radius:18px;background:rgba(14,38,92,0.7);border:1px solid var(--line);font-size:0.92rem;line-height:1.6}
+.msg.me .msg-bubble{background:linear-gradient(180deg,#194a9a,#12387a);border-top-right-radius:4px}
+.msg-bubble time{display:block;text-align:right;color:var(--muted);font-size:0.7rem;margin-top:6px}
+
+.sec-box{background:rgba(4,14,40,0.6);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+.sec-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(77,140,255,0.15)}
+.sec-item:last-child{border:0}
+.sec-item .s-ic{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex:none;color:#fff}
+.sec-item h5{color:#55b4ff;font-size:0.88rem;margin-bottom:3px}
+.sec-item ul{padding-left:16px;font-size:0.82rem;color:#d5e5ff}
+
+.suggestion-chips{display:flex;gap:8px;flex-wrap:wrap;padding:0 18px 10px;justify-content:center}
+.chip{padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(31,139,255,0.08);font-size:0.78rem;cursor:pointer;color:#d8e7ff;transition:background 0.2s}
+.chip:hover{background:rgba(31,139,255,0.22);border-color:var(--line-bright)}
+
+.chat-input-bar{display:flex;align-items:center;gap:8px;padding:12px 18px;border-top:1px solid var(--line);background:rgba(2,7,24,0.3)}
+.chat-input-bar input{
+  flex:1;background:rgba(6,18,48,0.75);border:1px solid var(--line);border-radius:14px;
+  padding:12px 16px;color:var(--text);font-size:0.92rem;transition:border-color 0.2s;
+}
+.chat-input-bar input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(31,139,255,0.2)}
+.send-btn{
+  width:44px;height:44px;border-radius:12px;border:none;background:linear-gradient(180deg,#258eff,#1468d6);
+  color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 16px rgba(31,139,255,0.4);
+}
+.send-btn svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2.2}
+
+/* Right Assistant Bar */
+aside.dash-right-bar{display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.aura-profile{padding:18px;text-align:center;position:relative}
+.aura-badge-pic{
+  width:110px;height:110px;margin:0 auto 12px;border-radius:50%;
+  border:2px solid rgba(31,139,255,0.7);box-shadow:0 0 30px rgba(31,139,255,0.35);
+  background:linear-gradient(145deg,#0e327d,#071a47);display:grid;place-items:center;
+}
+.aura-badge-pic svg{width:56px;height:56px;fill:var(--blue)}
+.aura-profile h3{font-size:1.4rem;font-weight:800;letter-spacing:-0.02em}
+.aura-profile p.r-sub{color:var(--cyan);font-size:0.86rem;font-weight:600;margin-top:2px}
+.aura-profile p.r-tag{color:var(--muted);font-size:0.8rem;margin-top:6px}
+
+.feature-facts{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.fact-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(77,140,255,0.12)}
+.fact-row:last-child{border:0}
+.fact-row .f-ic{width:34px;height:34px;border-radius:10px;background:rgba(31,139,255,0.16);display:grid;place-items:center;color:#6db2ff;flex:none}
+.fact-row .f-ic svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2}
+.fact-row b{font-size:0.82rem;display:block}
+.fact-row small{color:var(--muted);font-size:0.72rem}
+
+/* Quick Actions in Right Bar */
+.qa-box{padding:14px}
+.qa-box h4{font-size:0.86rem;margin-bottom:10px;color:#d0e2ff}
+.qa-btn{
+  width:100%;display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px;border-radius:10px;background:rgba(31,139,255,0.08);border:1px solid var(--line);
+  color:#d7e7ff;font-size:0.82rem;margin-bottom:8px;cursor:pointer;transition:all 0.18s;
+}
+.qa-btn:hover{background:rgba(31,139,255,0.2);border-color:var(--line-bright)}
+.qa-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* ========================================================
+   RESPONSIVENESS / MOBILE VIEWPORT (Mobile & Tablet)
+======================================================== */
+@media(max-width:1100px){
+  .dash-app{grid-template-columns:230px 1fr;padding:12px;gap:12px}
+  aside.dash-right-bar{display:none}
+}
+
+@media(max-width:820px){
+  /* Landing Header */
   .brand i{display:none}
-  .menu{display:grid!important;place-items:center}
-  header nav{position:absolute;top:72px;left:0;right:0;flex-direction:column;align-items:stretch;padding:14px 4%;background:rgba(3,10,31,.97);border-bottom:1px solid var(--line);display:none}
-  header nav.open{display:flex}
-  .nav-actions{margin:8px 0 0}
-  .nav-actions .btn{flex:1;justify-content:center}
-}
-@media(max-width:520px){
-  .features{grid-template-columns:1fr}
-  .bar{height:64px;padding-inline:14px}
-  .brand{gap:8px}.brand b{font-size:1.25rem}.brand svg{width:28px;height:28px}
-  header nav{top:64px}
-  .hero{padding-top:28px}
-  .modal{padding:24px 18px 20px;border-radius:18px}
+  .mobile-menu-btn{display:block}
+  nav.landing-nav{
+    position:fixed;top:var(--header-h);left:0;right:0;
+    flex-direction:column;align-items:stretch;padding:16px 20px;
+    background:rgba(2,7,24,0.98);backdrop-filter:blur(18px);
+    border-bottom:1px solid var(--line);display:none;z-index:35;gap:10px;
+  }
+  nav.landing-nav.open{display:flex}
+  .hero{grid-template-columns:1fr;padding:30px 0 20px;text-align:center}
+  .hero h1{font-size:2.3rem}
+  .lead{margin-inline:auto}
+  .features-grid{grid-template-columns:1fr 1fr}
+
+  /* Dashboard Structure on Tablets/Phones */
+  .dash-header{padding:0 14px}
+  .dash-app{grid-template-columns:1fr;padding:8px}
+  
+  /* Sidebar Drawer on Mobile */
+  aside.dash-left-bar{
+    position:fixed;top:var(--header-h);bottom:0;left:0;width:min(280px,82vw);
+    background:rgba(4,14,40,0.98);backdrop-filter:blur(20px);
+    border-right:1px solid var(--line-bright);z-index:50;
+    transform:translateX(-105%);transition:transform 0.25s cubic-bezier(0.16,1,0.3,1);
+    box-shadow:10px 0 40px rgba(0,0,0,0.6);
+  }
+  aside.dash-left-bar.open{transform:translateX(0)}
+  .mobile-dash-toggle{display:inline-flex}
+
+  .user-name{max-width:90px}
 }
 
-@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media(max-width:520px){
+  .features-grid{grid-template-columns:1fr}
+  .user-name{display:none}
+  .user-pill{padding:4px 8px}
+  .modal-card{padding:22px 18px}
+  .msg{max-width:96%}
+  .chat-input-bar{padding:8px 10px}
+}
+
+/* Sidebar Drawer Backdrop Overlay */
+.drawer-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);
+  z-index:45;display:none;
+}
+.drawer-backdrop.show{display:block}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="wrap bar">
-    <a class="brand" href="#home" aria-label="AuraAI home">
-      <svg viewBox="0 0 24 24" fill="#3aa0ff"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z" transform="translate(0 -.3)"/></svg>
-      <b>Aura<span>AI</span></b><i>AI Career &amp; Skills Navigator</i>
-    </a>
-    <button class="menu" id="menu" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
-    <nav id="nav">
-      <a class="link active" href="#home">Home</a>
-      <a class="link" href="#about">About</a>
-      <a class="link" href="#contact">Contact</a>
-      <div class="nav-actions">
-        <a class="btn" href="#" data-route="login">Login</a>
-        <a class="btn primary" href="#" data-route="register">Register</a>
-      </div>
-    </nav>
-  </div>
-</header>
+<div class="ambient-bg"></div>
 
-<main id="home" style="padding-top:72px">
-  <div class="wrap">
+<!-- ========================================================
+     1. LANDING PAGE VIEW
+======================================================== -->
+<div class="view active" id="viewLanding">
+  <header>
+    <div class="wrap landing-bar">
+      <div class="brand" onclick="switchView('landing')">
+        <svg viewBox="0 0 24 24"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z"/></svg>
+        <b>Aura<span>AI</span></b><i>AI Career &amp; Skills Navigator</i>
+      </div>
+      <button class="mobile-menu-btn" id="landingMenuToggle" aria-label="Toggle navigation">&#9776;</button>
+      <nav class="landing-nav" id="landingNav">
+        <a class="link active" href="#home">Home</a>
+        <a class="link" href="#about">About</a>
+        <a class="link" href="#contact">Contact</a>
+        <button class="btn" style="margin-left:8px" onclick="openAuthModal('login')">Login</button>
+        <button class="btn primary" onclick="openAuthModal('register')">Register</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap" id="home">
     <div class="hero">
       <div>
         <span class="badge">&#10022; Your AI Career Coach</span>
         <h1>Navigate your next move with <em>clarity.</em></h1>
-        <p class="lead">AI Career &amp; Skills Navigator helps you identify skill gaps, find free learning resources, and explore real-time job market trends, all in one place.</p>
-        <a class="btn primary lg" href="#" data-route="chat">&#128172; Enter Aura</a>
+        <p class="lead">AI Career &amp; Skills Navigator helps you pinpoint skill gaps, explore curated learning paths, and discover real-time career opportunities tailored to your goals.</p>
+        <button class="btn primary lg" onclick="openAuthModal('login')">&#128172; Enter Aura</button>
       </div>
       <div class="portrait">
-        <img src="aura_avatar.jpg" alt="Aura, your AI career coach">
-        <div class="hello">
-          <strong><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z"/></svg>Hi, I'm Aura!</strong>
-          <span>Your AI Career &amp; Skills Navigator</span>
+        <div class="portrait-ring"></div>
+        <div class="avatar-circle">
+          <svg viewBox="0 0 24 24"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z"/></svg>
+        </div>
+        <div class="hello-pill">
+          <strong><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> Hi, I'm Aura!</strong>
+          <span>Your AI Career &amp; Skills Guide</span>
         </div>
       </div>
     </div>
 
-    <div class="features">
-      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></div><h3>Find Skill Gaps</h3><p>Discover what skills to build next.</p></div>
-      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/><rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor"/></svg></div><h3>Learn for Free</h3><p>Get curated free resources &amp; courses.</p></div>
-      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M9 7h8v8"/></svg></div><h3>Market Trends</h3><p>Explore real-time job opportunities.</p></div>
-      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 9-9 9-9-9z"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg></div><h3>Build Your Future</h3><p>Get personalized career guidance.</p></div>
-    </div>
-  </div>
-</main>
-
-<section class="block" id="about">
-  <div class="wrap">
-    <h2>About AuraAI</h2>
-    <p class="sub">Aura is an AI agent that reasons about your goals, retrieves relevant knowledge, uses tools, and checks with you before important decisions.</p>
-    <div class="about-grid">
-      <div class="card"><h3>Knowledge-backed answers</h3><p>Aura searches a curated career knowledge base using RAG with FAISS and MiniLM embeddings, so advice stays grounded.</p></div>
-      <div class="card"><h3>Tools when needed</h3><p>Wikipedia, DuckDuckGo search, an approved HTTP request tool and a calculator, used only when they help answer your question.</p></div>
-      <div class="card"><h3>You stay in control</h3><p>For important choices Aura asks you to approve, reject or request another approach before it continues.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="contact">
-  <div class="wrap contact-grid">
-    <div>
-      <h2>Contact us</h2>
-      <p class="sub">Questions, feedback or ideas for Aura? Send a message and we will reply by email.</p>
-      <div class="info">
-        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>support@auraai.example</div>
-        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Chakwal, Punjab, Pakistan</div>
+    <div class="features-grid">
+      <div class="feat">
+        <div class="ico-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></div>
+        <h3>Find Skill Gaps</h3>
+        <p>Discover precisely what skills to build for your dream role.</p>
+      </div>
+      <div class="feat">
+        <div class="ico-wrap"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/></svg></div>
+        <h3>Learn for Free</h3>
+        <p>Get curated open-access tutorials, documentation, and labs.</p>
+      </div>
+      <div class="feat">
+        <div class="ico-wrap"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></div>
+        <h3>Market Trends</h3>
+        <p>Track live hiring demands and trending tech stacks.</p>
+      </div>
+      <div class="feat">
+        <div class="ico-wrap"><svg viewBox="0 0 24 24"><path d="M12 3l9 9-9 9-9-9z"/></svg></div>
+        <h3>Build Your Future</h3>
+        <p>Dynamic step-by-step roadmaps guided by smart reasoning.</p>
       </div>
     </div>
-    <form id="contactForm">
-      <label>Name<input required placeholder="Your name"></label>
-      <label>Email<input type="email" required placeholder="you@example.com"></label>
-      <label>Message<textarea required placeholder="How can we help?"></textarea></label>
-      <button class="btn primary" type="submit">Send message</button>
-      <p class="ok" id="ok">Message sent. We will get back to you soon.</p>
+  </main>
+</div>
+
+<!-- ========================================================
+     2. AUTH POPUP MODAL (LOGIN & REGISTRATION)
+======================================================== -->
+<div class="modal-overlay" id="authModal" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <button class="modal-close" onclick="closeAuthModal()" aria-label="Close modal">&times;</button>
+    
+    <div class="m-head">
+      <div class="m-avatar">
+        <svg viewBox="0 0 24 24"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z"/></svg>
+      </div>
+      <div>
+        <h2 id="mHeading">Welcome back</h2>
+        <p id="mSubHeading">Log in to enter your Aura dashboard.</p>
+      </div>
+    </div>
+
+    <div class="seg-tabs">
+      <button type="button" id="tabLogin" class="active" onclick="switchAuthTab('login')">Login</button>
+      <button type="button" id="tabRegister" onclick="switchAuthTab('register')">Register</button>
+    </div>
+
+    <!-- Login Form -->
+    <form class="auth-pane active" id="paneLogin" onsubmit="handleLoginSubmit(event)">
+      <div class="form-field">
+        <label>Email Address</label>
+        <input type="email" id="loginEmail" placeholder="tajdarkhalil099@gmail.com" required>
+        <span class="err-msg" id="loginEmailErr"></span>
+      </div>
+      <div class="form-field">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required>
+        <button type="button" class="pwd-toggle" onclick="togglePasswordVisibility('loginPassword', this)">Show</button>
+        <span class="err-msg" id="loginPassErr"></span>
+      </div>
+      <button type="submit" class="btn primary lg" style="justify-content:center;margin-top:6px">Log In</button>
+    </form>
+
+    <!-- Register Form -->
+    <form class="auth-pane" id="paneRegister" onsubmit="handleRegisterSubmit(event)">
+      <div class="form-field">
+        <label>Full Name</label>
+        <input type="text" id="regName" placeholder="Tajdar Khalil" required>
+        <span class="err-msg"></span>
+      </div>
+      <div class="form-field">
+        <label>Email Address</label>
+        <input type="email" id="regEmail" placeholder="tajdarkhalil099@gmail.com" required>
+        <span class="err-msg"></span>
+      </div>
+      <div class="form-field">
+        <label>Password</label>
+        <input type="password" id="regPass" placeholder="At least 8 characters" required>
+        <button type="button" class="pwd-toggle" onclick="togglePasswordVisibility('regPass', this)">Show</button>
+        <span class="err-msg"></span>
+      </div>
+      <button type="submit" class="btn primary lg" style="justify-content:center;margin-top:6px">Create Account</button>
     </form>
   </div>
-</section>
+</div>
 
-<footer>
-  <div class="wrap foot">
-    <span>&copy; <span id="yr">2026</span> AuraAI. All rights reserved.</span>
-    <nav>
-      <a href="#home">Home</a><a href="#about">About</a><a href="#contact">Contact</a>
-    </nav>
-  </div>
-</footer>
-
-<div class="overlay" id="overlay" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
-    <button class="x" id="close" aria-label="Close">&times;</button>
-
-    <div id="authBody">
-      <div class="m-head">
-        <img src="aura_avatar.jpg" alt="">
-        <div><h2 id="mTitle">Welcome back</h2><p id="mSub">Log in to continue with Aura.</p></div>
+<!-- ========================================================
+     3. DASHBOARD VIEW (HEADER + APP WORKSPACE)
+======================================================== -->
+<div class="view" id="viewDashboard">
+  
+  <!-- Dashboard Header Line Matching Mockup -->
+  <header class="dash-header">
+    <div class="dash-left">
+      <button class="mobile-dash-toggle btn" id="drawerBtn" onclick="toggleDashboardSidebar()" aria-label="Toggle drawer" style="display:none;padding:6px 10px">
+        &#9776;
+      </button>
+      <div class="brand" onclick="switchView('landing')">
+        <svg viewBox="0 0 24 24"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z"/></svg>
+        <b>Aura<span>AI</span></b><i>AI Career &amp; Skills Navigator</i>
       </div>
-      <div class="seg" role="tablist">
-        <button type="button" role="tab" id="tabLogin" data-mode="login" class="on">Login</button>
-        <button type="button" role="tab" id="tabRegister" data-mode="register">Register</button>
-      </div>
-
-      <form class="pane on" id="paneLogin" novalidate>
-        <div class="field"><label>Email<input name="email" type="email" autocomplete="email" placeholder="you@example.com"></label><div class="err"></div></div>
-        <div class="field"><label>Password<input name="password" type="password" autocomplete="current-password" placeholder="Enter your password"></label><button type="button" class="eye">Show</button><div class="err"></div></div>
-        <div class="row"><span></span><a href="#" id="forgot">Forgot password?</a></div>
-        <button class="btn primary lg" type="submit" style="justify-content:center">Log in</button>
-        <p class="m-foot" style="margin-top:2px">New to Aura? <button type="button" class="swap" data-mode="register">Create an account</button></p>
-      </form>
-
-      <form class="pane" id="paneRegister" novalidate>
-        <div class="field"><label>Full name<input name="name" autocomplete="name" placeholder="Your full name"></label><div class="err"></div></div>
-        <div class="field"><label>Email<input name="email" type="email" autocomplete="email" placeholder="you@example.com"></label><div class="err"></div></div>
-        <div class="field"><label>Password<input name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters"></label><button type="button" class="eye">Show</button><div class="err"></div></div>
-        <div class="field"><label>Confirm password<input name="confirm" type="password" autocomplete="new-password" placeholder="Repeat your password"></label><div class="err"></div></div>
-        <button class="btn primary lg" type="submit" style="justify-content:center">Create account</button>
-        <p class="m-foot" style="margin-top:2px">Already registered? <button type="button" class="swap" data-mode="login">Log in</button></p>
-      </form>
     </div>
 
-    <div class="notice" id="notice">
-      <div class="tick">&#10003;</div>
-      <h3 id="nTitle"></h3>
-      <p id="nText"></p>
-      <button class="btn primary lg" id="nBtn" type="button">Continue</button>
+    <!-- Right Header Elements: Notification Bell & User Profile Dropdown Pill -->
+    <div class="dash-actions">
+      <button class="bell-btn" aria-label="Notifications">
+        <svg viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 1 1 12 0v6l2 2H4zM10 21h4"/></svg>
+        <span class="bell-badge"></span>
+      </button>
+
+      <!-- Clickable User Profile Pill -->
+      <div class="user-pill" id="userPill" onclick="toggleUserDropdown(event)">
+        <div class="user-avatar" id="headerAvatar">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        </div>
+        <span class="user-name" id="headerUserName">tajdarkhalil099</span>
+        <svg class="pill-arrow" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+
+      <!-- Dropdown Menu Containing User Information & Logout -->
+      <div class="user-dropdown" id="userDropdown">
+        <div class="dropdown-user-info">
+          <div class="d-av">
+            <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#fff"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+          </div>
+          <div class="d-meta">
+            <b id="dropName">Tajdar Khalil</b>
+            <small id="dropEmail">tajdarkhalil099@gmail.com</small>
+            <span class="d-status"><i></i> Student • Online</span>
+          </div>
+        </div>
+
+        <button class="dropdown-item" onclick="alert('Profile Settings coming soon!')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Account Settings
+        </button>
+
+        <button class="dropdown-item logout" onclick="handleLogout()">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          Log Out
+        </button>
+      </div>
     </div>
+  </header>
+
+  <!-- Mobile Drawer Backdrop -->
+  <div class="drawer-backdrop" id="drawerBackdrop" onclick="toggleDashboardSidebar(false)"></div>
+
+  <!-- Dashboard App Grid -->
+  <div class="dash-app">
+    <!-- Left Sidebar -->
+    <aside class="panel dash-left-bar" id="dashSidebar">
+      <nav class="dash-menu">
+        <button class="active"><svg viewBox="0 0 24 24"><path d="M3 11 12 3l9 8v10h-6v-6H9v6H3z"/></svg>Chat with Aura</button>
+        <button><svg viewBox="0 0 24 24"><path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></svg>Career Roadmap</button>
+        <button><svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5zM7 11v5c0 1.5 2.2 3 5 3s5-1.5 5-3v-5"/></svg>Skills</button>
+        <button><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V4h6v3M3 13h18"/></svg>Opportunities</button>
+        <button><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Resources</button>
+      </nav>
+
+      <div class="prog-box">
+        <h4>Your Progress</h4>
+        <div class="prog-flex">
+          <div class="ring-prog"><span>68%</span></div>
+          <div class="prog-text">
+            <b>Growth Path</b>
+            <small>Data Science & AI</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="recent-box">
+        <h4>Recent Chats</h4>
+        <button class="chat-tab"><span class="ct-ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6zM14 3v5h5M10 13h4M10 17h4"/></svg></span><span><b>Web AppSec Roadmap</b><small>2 hours ago</small></span></button>
+        <button class="chat-tab"><span class="ct-ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6zM14 3v5h5M10 13h4M10 17h4"/></svg></span><span><b>Free Learning Resources</b><small>5 hours ago</small></span></button>
+        <button class="chat-tab"><span class="ct-ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6zM14 3v5h5M10 13h4M10 17h4"/></svg></span><span><b>Agentic AI Architecture</b><small>Yesterday</small></span></button>
+      </div>
+    </aside>
+
+    <!-- Center Workspace -->
+    <main class="panel dash-main">
+      <div class="chat-head">
+        <div class="chat-head-left">
+          <svg viewBox="0 0 24 24"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z"/></svg>
+          <div>
+            <h2>Chat with Aura</h2>
+            <p>Your AI Career &amp; Skills Guide</p>
+          </div>
+        </div>
+        <span class="online-pill"><i></i> Aura is online</span>
+      </div>
+
+      <!-- Messages Area -->
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg me">
+          <div class="msg-av"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+          <div class="msg-bubble">
+            What skills should I learn to become a Web Application Security Engineer?
+            <time>10:24 AM &#10003;&#10003;</time>
+          </div>
+        </div>
+
+        <div class="msg">
+          <div class="msg-av" style="background:linear-gradient(135deg,#0a2a6b,#051538)">
+            <svg viewBox="0 0 24 24" style="fill:var(--blue)"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z"/></svg>
+          </div>
+          <div class="msg-bubble">
+            <p>Great question, <b id="chatUserHighlight">Tajdar</b>! Becoming a Web Application Security Engineer requires hands-on offensive &amp; defensive skills:</p>
+            <div class="sec-box">
+              <div class="sec-item">
+                <span class="s-ic" style="background:#1f6fe0"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+                <div>
+                  <h5>1. Core Security Concepts</h5>
+                  <ul>
+                    <li>OWASP Top 10 (Injection, Broken Auth, SSRF)</li>
+                    <li>Authentication &amp; JWT/OAuth flows</li>
+                    <li>Secure code auditing (Python, JS)</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="sec-item">
+                <span class="s-ic" style="background:#4b4de0"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2"><path d="m4 17 6-6 4 4 6-7M15 8h5v5"/></svg></span>
+                <div>
+                  <h5>2. Tools &amp; Labs</h5>
+                  <ul>
+                    <li>Burp Suite Professional / Community</li>
+                    <li>PortSwigger Web Security Academy</li>
+                    <li>OWASP Juice Shop hands-on testing</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <p>Would you like me to generate a personalized 90-day learning roadmap for you?</p>
+            <time>10:24 AM</time>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Chips -->
+      <div class="suggestion-chips">
+        <button class="chip" onclick="handleChipClick(this)">Show me a 90-day roadmap</button>
+        <button class="chip" onclick="handleChipClick(this)">Free learning resources</button>
+        <button class="chip" onclick="handleChipClick(this)">Compare AppSec vs GRC</button>
+      </div>
+
+      <!-- Input Bar -->
+      <form class="chat-input-bar" onsubmit="handleChatSubmit(event)">
+        <input type="text" id="chatInput" placeholder="Ask Aura about careers, roadmaps, or skills..." autocomplete="off">
+        <button type="submit" class="send-btn" aria-label="Send message">
+          <svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        </button>
+      </form>
+    </main>
+
+    <!-- Right Sidebar -->
+    <aside class="panel dash-right-bar">
+      <div class="aura-profile">
+        <div class="aura-badge-pic">
+          <svg viewBox="0 0 24 24"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z"/></svg>
+        </div>
+        <h3>Aura <span>AI</span></h3>
+        <p class="r-sub">Your Career Coach &amp; Guide</p>
+        <p class="r-tag">Smart guidance. Clear roadmaps. Stronger decisions.</p>
+      </div>
+
+      <div class="feature-facts">
+        <div class="fact-row">
+          <span class="f-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></span>
+          <div><b>Reasoning Engine</b><small>RAG &amp; Knowledge Base</small></div>
+        </div>
+        <div class="fact-row">
+          <span class="f-ic"><svg viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/></svg></span>
+          <div><b>Curated Resources</b><small>Free labs &amp; documentation</small></div>
+        </div>
+      </div>
+
+      <div class="qa-box">
+        <h4>Quick Actions</h4>
+        <button class="qa-btn" onclick="sendPrompt('Generate my career roadmap')">Generate Career Roadmap <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+        <button class="qa-btn" onclick="sendPrompt('Analyze my current technical skills')">Analyze My Skills <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+        <button class="qa-btn" onclick="sendPrompt('Find entry-level opportunities')">Explore Opportunities <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
+    </aside>
   </div>
 </div>
 
 <script>
-document.getElementById('yr').textContent = new Date().getFullYear();
-
-// Mobile menu
-const nav = document.getElementById('nav'), menu = document.getElementById('menu');
-menu.addEventListener('click', () => {
-  const open = nav.classList.toggle('open');
-  menu.setAttribute('aria-expanded', open);
-});
-nav.addEventListener('click', e => { if (e.target.closest('a')) nav.classList.remove('open'); });
-
-// Highlight the nav button for the section in view
-const links = [...document.querySelectorAll('nav a.link')];
-const targets = ['home','about','contact'].map(id => document.getElementById(id));
-const io = new IntersectionObserver(entries => {
-  entries.forEach(en => {
-    if (en.isIntersecting) {
-      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + en.target.id));
-    }
-  });
-}, { rootMargin: '-45% 0px -50% 0px' });
-targets.forEach(t => io.observe(t));
-
-// ---- Login / Register popup ----
-const overlay = document.getElementById('overlay');
-const modal = overlay.querySelector('.modal');
-const titles = {
-  login:    ['Welcome back', 'Log in to continue with Aura.'],
-  register: ['Create your account', 'Start your career journey with Aura.']
+// State Management
+let currentUser = {
+  name: "Tajdar Khalil",
+  email: "tajdarkhalil099@gmail.com",
+  handle: "tajdarkhalil099"
 };
-let lastFocus = null;
 
-function setMode(mode) {
-  document.getElementById('paneLogin').classList.toggle('on', mode === 'login');
-  document.getElementById('paneRegister').classList.toggle('on', mode === 'register');
-  document.getElementById('tabLogin').classList.toggle('on', mode === 'login');
-  document.getElementById('tabRegister').classList.toggle('on', mode === 'register');
-  document.getElementById('tabLogin').setAttribute('aria-selected', mode === 'login');
-  document.getElementById('tabRegister').setAttribute('aria-selected', mode === 'register');
-  document.getElementById('mTitle').textContent = titles[mode][0];
-  document.getElementById('mSub').textContent = titles[mode][1];
-  clearErrors();
-}
-function clearErrors() {
-  overlay.querySelectorAll('.err').forEach(e => e.textContent = '');
-  overlay.querySelectorAll('input.bad').forEach(i => i.classList.remove('bad'));
-}
-function openModal(mode) {
-  lastFocus = document.activeElement;
-  document.getElementById('authBody').style.display = '';
-  document.getElementById('notice').classList.remove('show');
-  setMode(mode);
-  overlay.classList.add('show');
-  overlay.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
-  nav.classList.remove('open');
-  setTimeout(() => overlay.querySelector('.pane.on input').focus(), 30);
-}
-function closeModal() {
-  overlay.classList.remove('show');
-  overlay.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
-  overlay.querySelectorAll('form').forEach(f => f.reset());
-  if (lastFocus) lastFocus.focus();
-}
-function showNotice(title, text, btnText) {
-  document.getElementById('authBody').style.display = 'none';
-  document.getElementById('nTitle').textContent = title;
-  document.getElementById('nText').textContent = text;
-  document.getElementById('nBtn').textContent = btnText;
-  document.getElementById('notice').classList.add('show');
+// Switch Views (Landing <-> Dashboard)
+function switchView(viewName) {
+  document.getElementById('viewLanding').classList.toggle('active', viewName === 'landing');
+  document.getElementById('viewDashboard').classList.toggle('active', viewName === 'dashboard');
+  closeUserDropdown();
+  window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
-// Open from Login, Register and Enter Aura (Enter Aura asks for login first)
-document.querySelectorAll('[data-route]').forEach(a =>
-  a.addEventListener('click', e => {
-    e.preventDefault();
-    openModal(a.dataset.route === 'register' ? 'register' : 'login');
-  }));
+// Modal Controls
+function openAuthModal(mode = 'login') {
+  switchAuthTab(mode);
+  document.getElementById('authModal').classList.add('show');
+  document.getElementById('authModal').setAttribute('aria-hidden', 'false');
+}
 
-// Close: X button, backdrop click, Escape
-document.getElementById('close').addEventListener('click', closeModal);
-overlay.addEventListener('mousedown', e => { if (e.target === overlay) closeModal(); });
-document.addEventListener('keydown', e => {
-  if (!overlay.classList.contains('show')) return;
-  if (e.key === 'Escape') closeModal();
-  if (e.key === 'Tab') {            // keep focus inside the popup
-    const f = [...modal.querySelectorAll('button,input,a[href]')].filter(el => el.offsetParent !== null);
-    const first = f[0], last = f[f.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+function closeAuthModal() {
+  document.getElementById('authModal').classList.remove('show');
+  document.getElementById('authModal').setAttribute('aria-hidden', 'true');
+}
+
+function switchAuthTab(mode) {
+  const isLogin = mode === 'login';
+  document.getElementById('tabLogin').classList.toggle('active', isLogin);
+  document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+  document.getElementById('paneLogin').classList.toggle('active', isLogin);
+  document.getElementById('paneRegister').classList.toggle('active', !isLogin);
+  document.getElementById('mHeading').textContent = isLogin ? 'Welcome back' : 'Create your account';
+  document.getElementById('mSubHeading').textContent = isLogin ? 'Log in to enter your Aura dashboard.' : 'Start your career navigation with Aura.';
+}
+
+function togglePasswordVisibility(fieldId, btn) {
+  const input = document.getElementById(fieldId);
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.textContent = show ? 'Hide' : 'Show';
+}
+
+// Handle Login Form
+function handleLoginSubmit(e) {
+  e.preventDefault();
+  const emailInput = document.getElementById('loginEmail').value.trim();
+  if (emailInput) {
+    currentUser.email = emailInput;
+    currentUser.handle = emailInput.split('@')[0];
+    currentUser.name = currentUser.handle.replace(/[^a-zA-Z]/g, ' ') || "User";
+  }
+  updateUserProfileDisplay();
+  closeAuthModal();
+  switchView('dashboard');
+}
+
+// Handle Register Form
+function handleRegisterSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  if (email) {
+    currentUser.name = name || "User";
+    currentUser.email = email;
+    currentUser.handle = email.split('@')[0];
+  }
+  updateUserProfileDisplay();
+  closeAuthModal();
+  switchView('dashboard');
+}
+
+// Update Profile Details in Header & Dropdown
+function updateUserProfileDisplay() {
+  document.getElementById('headerUserName').textContent = currentUser.handle;
+  document.getElementById('dropName').textContent = currentUser.name;
+  document.getElementById('dropEmail').textContent = currentUser.email;
+  const highlight = document.getElementById('chatUserHighlight');
+  if(highlight) highlight.textContent = currentUser.name.split(' ')[0];
+}
+
+// Toggle Dropdown Menu
+function toggleUserDropdown(e) {
+  e.stopPropagation();
+  const pill = document.getElementById('userPill');
+  const dropdown = document.getElementById('userDropdown');
+  const isOpen = dropdown.classList.toggle('show');
+  pill.classList.toggle('open', isOpen);
+}
+
+function closeUserDropdown() {
+  const pill = document.getElementById('userPill');
+  const dropdown = document.getElementById('userDropdown');
+  if(dropdown) dropdown.classList.remove('show');
+  if(pill) pill.classList.remove('open');
+}
+
+// Handle Logout
+function handleLogout() {
+  closeUserDropdown();
+  switchView('landing');
+}
+
+// Global click outside to close dropdown
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#userPill') && !e.target.closest('#userDropdown')) {
+    closeUserDropdown();
   }
 });
 
-// Switch between Login and Register
-overlay.querySelectorAll('[data-mode]').forEach(b =>
-  b.addEventListener('click', () => setMode(b.dataset.mode)));
-
-// Show / hide password
-overlay.querySelectorAll('.eye').forEach(btn =>
-  btn.addEventListener('click', () => {
-    const input = btn.parentElement.querySelector('input');
-    const show = input.type === 'password';
-    input.type = show ? 'text' : 'password';
-    btn.textContent = show ? 'Hide' : 'Show';
-  }));
-
-// Validation helpers
-const emailOk = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
-function fail(input, msg) {
-  input.classList.add('bad');
-  input.closest('.field').querySelector('.err').textContent = msg;
-  return false;
-}
-function validate(form, mode) {
-  clearErrors();
-  const f = form.elements;
-  let ok = true, firstBad = null;
-  const check = (cond, input, msg) => { if (!cond) { ok = fail(input, msg); firstBad = firstBad || input; } };
-  if (mode === 'register') check(f.name.value.trim().length >= 2, f.name, 'Enter your full name.');
-  check(emailOk(f.email.value.trim()), f.email, 'Enter a valid email address.');
-  check(f.password.value.length >= (mode === 'register' ? 8 : 1), f.password,
-        mode === 'register' ? 'Use at least 8 characters.' : 'Enter your password.');
-  if (mode === 'register') check(f.confirm.value === f.password.value && f.confirm.value, f.confirm, 'Passwords do not match.');
-  if (firstBad) firstBad.focus();
-  return ok;
+// Mobile Sidebar Drawer Toggle
+function toggleDashboardSidebar(forceState) {
+  const sidebar = document.getElementById('dashSidebar');
+  const backdrop = document.getElementById('drawerBackdrop');
+  const isOpen = forceState !== undefined ? forceState : !sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', isOpen);
+  backdrop.classList.toggle('show', isOpen);
 }
 
-// Submit handlers (front-end only; connect Firebase Authentication here later)
-document.getElementById('paneLogin').addEventListener('submit', e => {
+// Chat Interaction
+function handleChatSubmit(e) {
   e.preventDefault();
-  if (!validate(e.target, 'login')) return;
-  console.log('Login:', e.target.elements.email.value);   // TODO: Firebase signInWithEmailAndPassword
-  showNotice('You are logged in', 'Aura is ready when you are.', 'Enter Aura');
-});
-document.getElementById('paneRegister').addEventListener('submit', e => {
-  e.preventDefault();
-  if (!validate(e.target, 'register')) return;
-  console.log('Register:', e.target.elements.email.value); // TODO: Firebase createUserWithEmailAndPassword
-  showNotice('Account created', 'Your account is ready. Log in to start chatting with Aura.', 'Go to login');
-  document.getElementById('nBtn').dataset.next = 'login';
-});
-document.getElementById('nBtn').addEventListener('click', e => {
-  if (e.target.dataset.next === 'login') { e.target.dataset.next = ''; openModal('login'); }
-  else window.location.href = 'dashboard.html';             // TODO: only after real Firebase login
-});
-document.getElementById('forgot').addEventListener('click', e => {
-  e.preventDefault();
-  const em = document.querySelector('#paneLogin input[name=email]');
-  if (!emailOk(em.value.trim())) { clearErrors(); fail(em, 'Enter your email first, then select Forgot password.'); em.focus(); return; }
-  showNotice('Check your inbox', 'If an account exists for ' + em.value.trim() + ', a reset link is on its way.', 'Back to login');
-  document.getElementById('nBtn').dataset.next = 'login';   // TODO: Firebase sendPasswordResetEmail
-});
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  sendPrompt(msg);
+  input.value = '';
+}
 
-// Contact form (front-end only)
-document.getElementById('contactForm').addEventListener('submit', e => {
-  e.preventDefault();
-  document.getElementById('ok').style.display = 'block';
-  e.target.reset();
-});
+function handleChipClick(chip) {
+  sendPrompt(chip.textContent.trim());
+}
+
+function sendPrompt(text) {
+  const container = document.getElementById('chatMessages');
+  const time = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  
+  // Add User Message Bubble
+  const userDiv = document.createElement('div');
+  userDiv.className = 'msg me';
+  userDiv.innerHTML = `
+    <div class="msg-av"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+    <div class="msg-bubble">${escapeHtml(text)}<time>${time} &#10003;&#10003;</time></div>
+  `;
+  container.appendChild(userDiv);
+  container.scrollTop = container.scrollHeight;
+
+  // Simulate AI Response
+  setTimeout(() => {
+    const aiDiv = document.createElement('div');
+    aiDiv.className = 'msg';
+    aiDiv.innerHTML = `
+      <div class="msg-av" style="background:linear-gradient(135deg,#0a2a6b,#051538)">
+        <svg viewBox="0 0 24 24" style="fill:var(--blue)"><path d="M12 1.5c.6 5.2 2.6 8.1 5.6 9.2 1.5.5 3.1.8 5 1.3-4.6 1-7.4 2.6-9 5.4-.7 1.2-1.2 3-1.6 5.6-.4-2.6-.9-4.4-1.6-5.6-1.6-2.8-4.4-4.4-9-5.4 1.9-.5 3.5-.8 5-1.3 3-1.1 5-4 5.6-9.2z"/></svg>
+      </div>
+      <div class="msg-bubble">
+        <p>I have processed your query regarding: <b>${escapeHtml(text)}</b>.</p>
+        <p>Based on your progress in Data Science and Agentic systems, I'm ready to link direct milestones or review relevant study modules.</p>
+        <time>${time}</time>
+      </div>
+    `;
+    container.appendChild(aiDiv);
+    container.scrollTop = container.scrollHeight;
+  }, 600);
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// Mobile Landing Menu Toggle
+const landingMenuToggle = document.getElementById('landingMenuToggle');
+const landingNav = document.getElementById('landingNav');
+if (landingMenuToggle) {
+  landingMenuToggle.addEventListener('click', () => {
+    landingNav.classList.toggle('open');
+  });
+}
+
+// Initial setup
+updateUserProfileDisplay();
 </script>
 </body>
 </html>
